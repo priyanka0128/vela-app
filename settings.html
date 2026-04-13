@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Settings — Vela</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+    <a href="home.html" style="font-size:13px;color:#1a3a5c">← Back</a>
+    <h1>Settings</h1>
+  </div>
+
+  <div class="card">
+    <h2>Profile</h2><br>
+    <label>Name</label>
+    <input type="text" id="s-name" placeholder="Your name">
+    <label>Region</label>
+    <select id="s-region">
+      <option value="Spain">Spain</option>
+      <option value="Mexico">Mexico</option>
+      <option value="Ireland">Ireland</option>
+      <option value="UK">UK</option>
+      <option value="USA">USA</option>
+    </select>
+    <label>Language</label>
+    <select id="s-lang">
+      <option value="es-ES">Spanish (Spain)</option>
+      <option value="es-MX">Spanish (Mexico)</option>
+      <option value="en-IE">English (Ireland)</option>
+      <option value="en-GB">English (UK)</option>
+      <option value="en-US">English (USA)</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Communication style</h2><br>
+    <label>Tone</label>
+    <select id="s-tone">
+      <option value="casual">Casual</option>
+      <option value="formal">Formal</option>
+    </select>
+    <label>Humour</label>
+    <select id="s-humour">
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+    <label>Slang</label>
+    <select id="s-slang">
+      <option value="none">None</option>
+      <option value="low">Low</option>
+      <option value="medium">Medium</option>
+      <option value="high">High</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Communication mode</h2><br>
+    <select id="s-mode">
+      <option value="voice">Voice</option>
+      <option value="text">Text</option>
+      <option value="touch">Touch pictograms</option>
+      <option value="eye">Eye tracking</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>Accessibility</h2><br>
+    <label>
+      <input type="checkbox" id="s-hc">
+      &nbsp; High contrast
+    </label><br><br>
+    <label>
+      <input type="checkbox" id="s-lt">
+      &nbsp; Large text
+    </label>
+  </div>
+
+  <div class="card">
+    <h2>Data</h2><br>
+    <button class="btn-secondary"
+      style="width:100%;margin-bottom:10px"
+      onclick="exportData()">
+      Export my data
+    </button>
+    <button class="btn-danger"
+      style="width:100%"
+      onclick="clearData()">
+      Clear all data
+    </button>
+  </div>
+
+  <button class="btn-primary" onclick="saveSettings()">
+    Save settings
+  </button>
+
+</div>
+
+<script src="js/app.js"></script>
+<script>
+// Load current settings
+window.addEventListener('DOMContentLoaded', () => {
+  const p = getProfile();
+  if (p.name)   document.getElementById('s-name').value   = p.name;
+  if (p.region) document.getElementById('s-region').value = p.region;
+  if (p.lang)   document.getElementById('s-lang').value   = p.lang;
+  if (p.tone)   document.getElementById('s-tone').value   = p.tone;
+  if (p.humour) document.getElementById('s-humour').value = p.humour;
+  if (p.slang)  document.getElementById('s-slang').value  = p.slang;
+  if (p.mode)   document.getElementById('s-mode').value   = p.mode;
+  document.getElementById('s-hc').checked = !!p.highContrast;
+  document.getElementById('s-lt').checked = !!p.largeText;
+});
+
+function saveSettings() {
+  const p = getProfile();
+  Object.assign(p, {
+    name:         document.getElementById('s-name').value,
+    region:       document.getElementById('s-region').value,
+    lang:         document.getElementById('s-lang').value,
+    tone:         document.getElementById('s-tone').value,
+    humour:       document.getElementById('s-humour').value,
+    slang:        document.getElementById('s-slang').value,
+    mode:         document.getElementById('s-mode').value,
+    highContrast: document.getElementById('s-hc').checked,
+    largeText:    document.getElementById('s-lt').checked
+  });
+  saveProfile(p);
+  alert('Settings saved!');
+  window.location.href = 'home.html';
+}
+
+function exportData() {
+  const data = {
+    profile: getProfile(),
+    history: getHistory()
+  };
+  const blob = new Blob(
+    [JSON.stringify(data, null, 2)],
+    { type: 'application/json' }
+  );
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'vela-data.json';
+  a.click();
+}
+
+function clearData() {
+  if (confirm('This will delete all your data. Are you sure?')) {
+    localStorage.clear();
+    alert('All data cleared.');
+    window.location.href = 'index.html';
+  }
+}
+</script>
+</body>
+</html>

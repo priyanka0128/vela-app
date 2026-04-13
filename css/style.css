@@ -273,3 +273,18 @@ body.large h1 {
 body.large .picto-btn {
   font-size: 34px;
 }
+
+.emotion-record-btn {
+  padding: 14px 10px;
+  border-radius: 10px;
+  border: 1px solid #e3e3df;
+  background: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  transition: background .15s;
+}
+
+.emotion-record-btn:hover {
+  background: #f0f4f8;
+}

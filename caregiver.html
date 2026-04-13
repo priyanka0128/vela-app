@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Caregiver — Vela</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+    <a href="home.html" style="font-size:13px;color:#1a3a5c">← Back</a>
+    <h1>Caregiver mode</h1>
+  </div>
+
+  <!-- PIN gate -->
+  <div id="pin-gate">
+    <div class="card">
+      <p>Enter the caregiver PIN to access settings.</p>
+      <label>PIN (default: 1234)</label>
+      <input type="password" id="pin-input"
+        placeholder="Enter PIN" maxlength="6">
+      <button class="btn-primary" onclick="checkPin()">
+        Enter
+      </button>
+    </div>
+  </div>
+
+  <!-- Caregiver panel (hidden until PIN correct) -->
+  <div id="carer-panel" style="display:none">
+
+    <div class="card">
+      <h2>Patient profile</h2><br>
+      <div id="patient-info"></div>
+    </div>
+
+    <div class="card">
+      <h2>Add custom phrase</h2><br>
+      <label>Phrase to add</label>
+      <input type="text" id="custom-phrase"
+        placeholder="e.g. I need my medication">
+      <button class="btn-primary" onclick="addPhrase()">
+        Add Phrase
+      </button>
+    </div>
+
+    <div class="card">
+      <h2>Saved phrases</h2><br>
+      <div id="saved-phrases"></div>
+    </div>
+
+    <div class="card">
+      <h2>Accessibility</h2><br>
+      <label>
+        <input type="checkbox" id="hc-toggle"
+          onchange="toggleHighContrast()">
+        &nbsp; High contrast mode
+      </label><br><br>
+      <label>
+        <input type="checkbox" id="lt-toggle"
+          onchange="toggleLargeText()">
+        &nbsp; Large text mode
+      </label>
+    </div>
+
+    <div class="card">
+      <h2>Change PIN</h2><br>
+      <input type="password" id="new-pin"
+        placeholder="New PIN (numbers only)" maxlength="6">
+      <button class="btn-primary" onclick="changePin()">
+        Save new PIN
+      </button>
+    </div>
+
+    <button class="btn-secondary"
+      style="width:100%;margin-top:10px"
+      onclick="window.location.href='home.html'">
+      Back to patient view
+    </button>
+
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/caregiver.js"></script>
+</body>
+</html>

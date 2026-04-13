@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Home — Vela</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px">
+    <h1 id="greeting">Hello</h1>
+    <a href="settings.html" style="font-size:13px;color:#1a3a5c">Settings</a>
+  </div>
+
+  <!-- Voice mode -->
+  <div id="mode-voice" style="display:none">
+    <div class="card" style="text-align:center">
+      <p>Your mode: <strong>Voice</strong></p>
+      <p>Speak and Vela will communicate for you in your voice.</p>
+    </div>
+    <button class="btn-primary"
+      onclick="window.location.href='communicate.html'">
+      Start Speaking
+    </button>
+  </div>
+
+  <!-- Text mode -->
+  <div id="mode-text" style="display:none">
+    <div class="card" style="text-align:center">
+      <p>Your mode: <strong>Text</strong></p>
+      <p>Type what you want to say and Vela speaks it for you.</p>
+    </div>
+    <button class="btn-primary"
+      onclick="window.location.href='communicate.html'">
+      Start Typing
+    </button>
+  </div>
+
+  <!-- Eye mode -->
+  <div id="mode-eye" style="display:none">
+    <div class="card" style="text-align:center">
+      <p>Your mode: <strong>Eye Tracking</strong></p>
+      <p>Look at pictograms to build sentences.</p>
+    </div>
+    <button class="btn-primary"
+      onclick="window.location.href='communicate.html'">
+      Start Eye Tracking
+    </button>
+  </div>
+
+  <!-- Touch mode -->
+  <div id="mode-touch" style="display:none">
+    <div class="card" style="text-align:center">
+      <p>Your mode: <strong>Touch</strong></p>
+      <p>Tap pictograms to build sentences.</p>
+    </div>
+    <button class="btn-primary"
+      onclick="window.location.href='communicate.html'">
+      Start Communicating
+    </button>
+  </div>
+
+  <!-- Quick phrases -->
+  <div id="quick-phrases" style="margin-top:20px"></div>
+
+  <!-- Bottom nav -->
+  <div style="display:flex;gap:10px;margin-top:30px">
+    <button class="btn-secondary"
+      style="flex:1"
+      onclick="window.location.href='caregiver.html'">
+      Caregiver
+    </button>
+    <button class="btn-secondary"
+      style="flex:1"
+      onclick="window.location.href='settings.html'">
+      Settings
+    </button>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  const p = getProfile();
+
+  // Show greeting
+  document.getElementById('greeting').textContent =
+    'Hello, ' + (p.name || 'there');
+
+  // Show correct mode section
+  const mode = p.mode || 'touch';
+  const el = document.getElementById('mode-' + mode);
+  if (el) el.style.display = 'block';
+
+  // Show recent phrases
+  const history = getHistory();
+  if (history.length > 0) {
+    const container = document.getElementById('quick-phrases');
+    container.innerHTML = '<h2 style="margin-bottom:10px">Recent phrases</h2>';
+    history.slice(0, 5).forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      div.textContent = item.text;
+      div.onclick = () => rewriteAndSpeak(item.text);
+      container.appendChild(div);
+    });
+  }
+</script>
+</body>
+</html>

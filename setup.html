@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Setup — Vela</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <!-- Progress bar -->
+  <div class="progress-bar">
+    <div class="p-dot active" id="d1"></div>
+    <div class="p-dot" id="d2"></div>
+    <div class="p-dot" id="d3"></div>
+    <div class="p-dot" id="d4"></div>
+    <div class="p-dot" id="d5"></div>
+    <div class="p-dot" id="d6"></div>
+  </div>
+
+  <!-- STEP 1: Profile -->
+  <div id="s1">
+    <h1>About you</h1>
+    <p>This helps us personalise your communication style.</p>
+    <div class="card">
+      <label>Your name</label>
+      <input type="text" id="name" placeholder="First name">
+      <label>Age</label>
+      <input type="number" id="age" placeholder="e.g. 45" min="1" max="120">
+      <label>Language</label>
+      <select id="lang">
+        <option value="es-ES">Spanish (Spain)</option>
+        <option value="es-MX">Spanish (Mexico)</option>
+        <option value="en-IE">English (Ireland)</option>
+        <option value="en-GB">English (UK)</option>
+        <option value="en-US">English (USA)</option>
+        <option value="fr-FR">French</option>
+      </select>
+      <label>Region / Country</label>
+      <select id="region">
+        <option value="Spain">Spain</option>
+        <option value="Mexico">Mexico</option>
+        <option value="Ireland">Ireland</option>
+        <option value="UK">UK</option>
+        <option value="USA">USA</option>
+        <option value="France">France</option>
+      </select>
+      <label>Caregiver name (optional)</label>
+      <input type="text" id="carer" placeholder="Leave blank if none">
+    </div>
+    <button class="btn-primary" onclick="next1()">Continue</button>
+  </div>
+
+  <!-- STEP 2: Capabilities -->
+  <div id="s2" style="display:none">
+    <h1>How can you communicate?</h1>
+    <p>Select everything that applies right now.</p>
+    <div class="card">
+      <label><input type="checkbox" name="cap" value="speak">&nbsp; I can speak</label><br><br>
+      <label><input type="checkbox" name="cap" value="type">&nbsp; I can type</label><br><br>
+      <label><input type="checkbox" name="cap" value="eye">&nbsp; I can control with my eyes</label><br><br>
+      <label><input type="checkbox" name="cap" value="touch">&nbsp; I can tap / touch a screen</label>
+    </div>
+    <button class="btn-primary" onclick="next2()">Continue</button>
+  </div>
+
+  <!-- STEP 3: Personality -->
+  <div id="s3" style="display:none">
+    <h1>Your personality</h1>
+    <p>This shapes how Vela speaks for you.</p>
+    <div class="card">
+      <label>Tone</label>
+      <select id="tone">
+        <option value="casual">Casual</option>
+        <option value="formal">Formal</option>
+      </select>
+      <label>Humour level</label>
+      <select id="humour">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+      <label>Slang usage</label>
+      <select id="slang">
+        <option value="none">None</option>
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+      <label>Energy level</label>
+      <select id="energy">
+        <option value="low">Low</option>
+        <option value="medium" selected>Medium</option>
+        <option value="high">High</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="next3()">Continue</button>
+  </div>
+
+  <!-- STEP 4: Voice setup -->
+  <div id="s4" style="display:none">
+    <h1>Your voice</h1>
+    <p>Record a short voice sample so Vela can learn your voice. Speak naturally for about 30 seconds.</p>
+    <div class="card">
+      <div id="record-status" style="text-align:center;padding:20px;color:#888;font-size:15px">
+        Press record and speak naturally
+      </div>
+      <div style="display:flex;gap:10px;margin-top:10px">
+        <button class="btn-primary" id="record-btn" onclick="startRecording()">
+          Start Recording
+        </button>
+        <button class="btn-secondary" onclick="skipVoice()">
+          Skip for now
+        </button>
+      </div>
+    </div>
+    <div id="recording-preview" style="display:none" class="card">
+      <p>Recording saved. You can re-record or continue.</p>
+      <button class="btn-primary" onclick="next4()">Continue</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Emotional sounds -->
+  <div id="s5" style="display:none">
+    <h1>Emotional sounds</h1>
+    <p>Record these sounds so Vela can express your real emotions. Tap each button and make the sound.</p>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <button class="emotion-record-btn" id="btn-laugh" onclick="recordEmotion('laugh', this)">
+          😄 Record Laugh
+        </button>
+        <button class="emotion-record-btn" id="btn-cry" onclick="recordEmotion('cry', this)">
+          😢 Record Cry
+        </button>
+        <button class="emotion-record-btn" id="btn-sigh" onclick="recordEmotion('sigh', this)">
+          😮‍💨 Record Sigh
+        </button>
+        <button class="emotion-record-btn" id="btn-frustration" onclick="recordEmotion('frustration', this)">
+          😤 Record Frustration
+        </button>
+      </div>
+    </div>
+    <button class="btn-primary" onclick="next5()">Continue</button>
+    <br><br>
+    <button class="btn-secondary" onclick="next5()">Skip emotions</button>
+  </div>
+
+  <!-- STEP 6: All done -->
+  <div id="s6" style="display:none">
+    <h1>You are all set!</h1>
+    <p>Vela is ready to communicate for you.</p>
+    <div class="card" id="profile-summary">
+    </div>
+    <button class="btn-primary" onclick="window.location.href='communicate.html'">
+      Start Communicating
+    </button>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/setup.js"></script>
+</body>
+</html>
