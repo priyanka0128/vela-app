@@ -86,34 +86,24 @@ const DWELL_TIME     = 1000; // 1 second to select
 // ── Init ─────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   const profile = getProfile();
-  const mode    = profile.mode || 'touch';
+  const mode    = profile.mode || 'text';
 
-  // Show correct section
-  const ml = document.getElementById('mode-label');
-if (ml) ml.textContent =
-  mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode';
+  // Show correct mode
+  switchMode(mode);
 
-  if (mode === 'voice') {
-    document.getElementById('section-voice').style.display = 'block';
-    initVoice();
-  } else if (mode === 'text') {
-    document.getElementById('section-text').style.display = 'block';
-  } else if (mode === 'eye') {
-    document.getElementById('section-eye').style.display = 'block';
-    renderEyeGrid('basic');
-    initEyeTracking();
-  } else {
-    document.getElementById('section-picto').style.display = 'block';
-    renderGrid('basic');
+  // Enter key submits text
+  const ta = document.getElementById('text-input');
+  if (ta) {
+    ta.addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendText();
+      }
+    });
   }
 
   loadHistory();
-
-  // Highlight active mode button
-  const activeBtn = document.getElementById('btn-' + mode);
-  if (activeBtn) activeBtn.classList.add('active');
 });
-
 // ── VOICE MODE ───────────────────────────────────────
 function initVoice() {
   if (!('webkitSpeechRecognition' in window) &&
@@ -465,3 +455,46 @@ function switchMode(mode) {
   modeLabel.textContent =
     mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode';
 }}
+
+function switchMode(mode) {
+  // Hide all
+  ['voice','text','picto'].forEach(m => {
+    const el = document.getElementById('section-' + m);
+    if (el) el.style.display = 'none';
+  });
+  // Remove active from all tabs
+  ['voice','text','touch'].forEach(m => {
+    const t = document.getElementById('tab-' + m);
+    if (t) t.classList.remove('active');
+  });
+  // Show selected
+  if (mode === 'voice') {
+    document.getElementById('section-voice').style.display = 'block';
+    document.getElementById('tab-voice').classList.add('active');
+    initVoice();
+  } else if (mode === 'text') {
+    document.getElementById('section-text').style.display = 'block';
+    document.getElementById('tab-text').classList.add('active');
+    // Focus textarea
+    setTimeout(() => {
+      const ta = document.getElementById('text-input');
+      if (ta) ta.focus();
+    }, 100);
+  } else if (mode === 'touch') {
+    document.getElementById('section-picto').style.display = 'block';
+    document.getElementById('tab-touch').classList.add('active');
+    renderGrid('basic');
+  }
+  // Save mode
+  const p = getProfile();
+  p.mode = mode;
+  saveProfile(p);
+}
+
+function sendText() {
+  const input  = document.getElementById('text-input');
+  const text   = input.value.trim();
+  if (!text) { alert('Please type something first.'); return; }
+  rewriteAndSpeak(text);
+  input.value = '';
+}

@@ -43,7 +43,7 @@
     <button class="emotion-btn" onclick="playEmotion('frustration')">😤</button>
   </div>
 
-  <!-- Mode tabs -->
+<!-- Mode tabs -->
   <div class="mode-tabs">
     <button class="mode-tab" id="tab-voice" onclick="switchMode('voice')">
       🗣 Voice
@@ -59,60 +59,78 @@
     </button>
   </div>
 
-<!-- VOICE MODE -->
-<div id="section-voice" style="display:none">
-  <div class="card" style="text-align:center;padding:40px 20px">
-
-    <button id="mic-btn"
-      onclick="toggleVoice()"
-      style="width:90px;height:90px;border-radius:50%;
-      border:none;background:var(--navy);
-      font-size:36px;cursor:pointer;
-      display:block;margin:0 auto 20px;
-      box-shadow:0 4px 20px rgba(15,39,68,.35);
-      transition:all .2s">
-      🎤
-    </button>
-
-    <div id="voice-status"
-      style="font-size:14px;color:var(--muted);margin-bottom:8px">
-      Press the button and speak
+  <!-- VOICE MODE -->
+  <div id="section-voice" style="display:none">
+    <div class="card" style="text-align:center;padding:40px 20px">
+      <button id="mic-btn"
+        onclick="toggleVoice()"
+        style="width:90px;height:90px;border-radius:50%;
+        border:none;background:var(--navy);
+        font-size:36px;cursor:pointer;
+        display:block;margin:0 auto 20px;
+        box-shadow:0 4px 20px rgba(15,39,68,.35);
+        transition:all .2s">
+        🎤
+      </button>
+      <div id="voice-status"
+        style="font-size:14px;color:var(--muted);margin-bottom:8px">
+        Press the button and speak
+      </div>
+      <div style="font-size:11px;color:#cbd5e1">
+        Chrome only · Allow microphone access
+      </div>
     </div>
-
-    <div style="font-size:11px;color:#cbd5e1">
-      Chrome only · Allow microphone access
-    </div>
-
   </div>
-</div>
+
+  <!-- TEXT MODE -->
+  <div id="section-text" style="display:none">
+    <div class="card">
+      <label style="font-size:13px;color:var(--muted);margin-bottom:8px;display:block">
+        Type what you want to say
+      </label>
+      <textarea id="text-input"
+        rows="4"
+        placeholder="Type here and press Speak..."
+        style="width:100%;padding:12px 14px;border:1.5px solid var(--border);
+        border-radius:var(--radius-sm);font-size:16px;
+        font-family:'DM Sans',sans-serif;resize:none;
+        margin-bottom:12px;line-height:1.5">
+      </textarea>
+      <button class="btn-primary" id="speak-btn" onclick="sendText()">
+        Speak in my voice →
+      </button>
+    </div>
+  </div>
 
   <!-- PICTOGRAM MODE -->
   <div id="section-picto" style="display:none">
 
-    <!-- Selected bar -->
     <div id="selected-bar"
-      style="background:var(--light);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;min-height:52px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">
+      style="background:var(--light);border:1.5px solid var(--border);
+      border-radius:var(--radius);padding:12px 14px;min-height:52px;
+      display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">
       <span id="selected-empty" style="color:var(--muted);font-size:13px">
         Tap pictograms to build a sentence
       </span>
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn-primary" id="speak-btn" style="flex:2" onclick="speakPictogram()">
+      <button class="btn-primary" id="speak-btn"
+        style="flex:2" onclick="speakPictogram()">
         Speak →
       </button>
-      <button class="btn-secondary" style="flex:1" onclick="clearPictogram()">
+      <button class="btn-secondary"
+        style="flex:1" onclick="clearPictogram()">
         Clear
       </button>
     </div>
 
-    <!-- Categories -->
     <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="cat-btn active" onclick="showCategory('basic', this)">Basic</button>
-      <button class="cat-btn" onclick="showCategory('feelings', this)">Feelings</button>
-      <button class="cat-btn" onclick="showCategory('food', this)">Food</button>
-      <button class="cat-btn" onclick="showCategory('body', this)">Body</button>
-      <button class="cat-btn" onclick="showCategory('actions', this)">Actions</button>
+      <button class="cat-btn active" onclick="showCategory('basic',this)">Basic</button>
+      <button class="cat-btn" onclick="showCategory('feelings',this)">Feelings</button>
+      <button class="cat-btn" onclick="showCategory('food',this)">Food</button>
+      <button class="cat-btn" onclick="showCategory('body',this)">Body</button>
+      <button class="cat-btn" onclick="showCategory('actions',this)">Actions</button>
     </div>
 
     <div class="picto-grid" id="picto-grid"></div>
@@ -125,8 +143,6 @@
       <p style="color:var(--muted);font-size:13px">No recent phrases yet</p>
     </div>
   </div>
-
-</div>
 
 <script src="js/app.js"></script>
 <script src="js/communicate.js"></script>
