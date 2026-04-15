@@ -18,25 +18,28 @@ export default async function handler(req, res) {
 
     console.log('KEY START:', process.env.GROQ_API_KEY?.substring(0, 8));
 
-    const prompt = `You rewrite text to match a person's natural speaking voice.
+    const prompt = `You are helping a person with ALS communicate naturally.
+They selected these pictograms: ${text}
 
+Their profile:
 Region: ${profile?.region || 'Ireland'}
 Language: ${profile?.lang || 'en'}
 Tone: ${profile?.tone || 'casual'}
-Humour level: ${profile?.humour || 'medium'}
-Slang level: ${profile?.slang || 'low'}
-Energy level: ${profile?.energy || 'medium'}
+
+Convert the pictogram labels into ONE natural sentence that a real person would say.
+Examples:
+- "Eat, Water" → "I would like something to eat and some water please."
+- "Help, Pain" → "I need help, I am in pain."
+- "Happy, Love" → "I am feeling happy, I love you."
+- "Medicine, Doctor" → "I need my medicine and I want to see the doctor."
+- "Tired, Sleep" → "I am very tired, I need to sleep."
 
 Rules:
-- Keep the exact same meaning
-- ALWAYS write the output in the person's language — if language is es-ES or es-MX write in Spanish, if en write in English
-- Use regional dialect, slang and expressions natural to that region
-- For Spain use Spanish slang like tío, joder, macho, venga, hostia
-- For Mexico use Mexican slang like wey, no manches, órale, chido, qué onda
-- Match the tone and humour level
-- Return ONLY the rewritten sentence, nothing else
-
-Text to rewrite: ${text}`;
+- Write in the person's language (${profile?.lang || 'en'})
+- Sound warm and natural like a real person speaking
+- One sentence only
+- No slang endings like tío, venga, man, dude
+- Return ONLY the sentence, nothing else`;
 
     const response = await fetch(
       'https://api.groq.com/openai/v1/chat/completions',

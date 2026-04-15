@@ -10,144 +10,120 @@
 <div class="page">
 
   <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-   <!--  <a href="home.html" style="font-size:13px;color:#1a3a5c">← Home</a>
-    <h2 id="mode-label">Communicate</h2>
-    <a href="settings.html" style="font-size:13px;color:#1a3a5c">Settings</a> -->
-    <div style="display:flex;gap:8px;margin-bottom:16px">
-  <button class="cat-btn" id="btn-voice" onclick="switchMode('voice')">Voice</button>
-  <button class="cat-btn" id="btn-text" onclick="switchMode('text')">Text</button>
-  <button class="cat-btn" id="btn-touch" onclick="switchMode('touch')">Pictograms</button>
-  <button class="cat-btn" id="btn-eye" onclick="switchMode('eye')">Eye</button>
-</div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div style="display:flex;align-items:center;gap:8px">
+    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
+    </div>
+    <div id="speaking-indicator" style="display:none;align-items:center;gap:8px">
+      <div class="speaking-wave">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <span style="font-size:12px;color:var(--accent);font-weight:500">Speaking...</span>
+    </div>
+    <a href="settings.html"
+      style="font-size:13px;color:var(--muted);text-decoration:none">
+      ⚙
+    </a>
   </div>
 
-  <!-- Output box — shows what Vela said -->
+  <!-- Output -->
   <div class="output-box" id="output-text">
     Your message will appear here...
   </div>
 
-  <!-- Speak button for output -->
-  <button class="btn-secondary"
-    id="replay-btn"
-    style="margin-bottom:16px;width:100%"
-    onclick="replayLast()">
-    Replay Last
-  </button>
-
-  <!-- Emotion buttons -->
-  <div class="emotion-bar" id="emotion-bar">
-    <button class="emotion-btn" onclick="playEmotion('laugh')" title="Laugh">😄</button>
-    <button class="emotion-btn" onclick="playEmotion('cry')" title="Cry">😢</button>
-    <button class="emotion-btn" onclick="playEmotion('sigh')" title="Sigh">😮‍💨</button>
-    <button class="emotion-btn" onclick="playEmotion('frustration')" title="Frustration">😤</button>
+  <!-- Replay + Emotions -->
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button onclick="replayLast()"
+      style="flex:1;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;color:var(--blue);cursor:pointer">
+      ↺ Replay
+    </button>
+    <button class="emotion-btn" onclick="playEmotion('laugh')">😄</button>
+    <button class="emotion-btn" onclick="playEmotion('cry')">😢</button>
+    <button class="emotion-btn" onclick="playEmotion('sigh')">😮‍💨</button>
+    <button class="emotion-btn" onclick="playEmotion('frustration')">😤</button>
   </div>
 
-  <!-- VOICE MODE -->
-  <div id="section-voice" style="display:none">
-    <div class="card" style="text-align:center">
-      <div id="voice-status" style="font-size:15px;color:#888;margin-bottom:16px">
-        Press the button and speak
-      </div>
-      <button class="btn-primary" id="mic-btn" onclick="toggleVoice()">
-        🎤 Start Speaking
-      </button>
+  <!-- Mode tabs -->
+  <div class="mode-tabs">
+    <button class="mode-tab" id="tab-voice" onclick="switchMode('voice')">
+      🗣 Voice
+    </button>
+    <button class="mode-tab" id="tab-text" onclick="switchMode('text')">
+      ⌨ Text
+    </button>
+    <button class="mode-tab" id="tab-touch" onclick="switchMode('touch')">
+      👆 Pictos
+    </button>
+    <button class="mode-tab" onclick="window.location.href='eyetrack.html'">
+      👁 Eyes
+    </button>
+  </div>
+
+<!-- VOICE MODE -->
+<div id="section-voice" style="display:none">
+  <div class="card" style="text-align:center;padding:40px 20px">
+
+    <button id="mic-btn"
+      onclick="toggleVoice()"
+      style="width:90px;height:90px;border-radius:50%;
+      border:none;background:var(--navy);
+      font-size:36px;cursor:pointer;
+      display:block;margin:0 auto 20px;
+      box-shadow:0 4px 20px rgba(15,39,68,.35);
+      transition:all .2s">
+      🎤
+    </button>
+
+    <div id="voice-status"
+      style="font-size:14px;color:var(--muted);margin-bottom:8px">
+      Press the button and speak
     </div>
-  </div>
 
-  <!-- TEXT MODE -->
-  <div id="section-text" style="display:none">
-    <div class="card">
-      <label>Type what you want to say</label>
-      <textarea id="text-input"
-        rows="3"
-        placeholder="Type here..."
-        style="resize:none"></textarea>
-      <button class="btn-primary" id="speak-btn"
-        onclick="sendText()">
-        Speak
-      </button>
+    <div style="font-size:11px;color:#cbd5e1">
+      Chrome only · Allow microphone access
     </div>
-  </div>
 
-  <!-- PICTOGRAM MODE (touch + eye) -->
+  </div>
+</div>
+
+  <!-- PICTOGRAM MODE -->
   <div id="section-picto" style="display:none">
 
-    <!-- Selected pictograms bar -->
-    <div id="selected-bar" class="card"
-      style="min-height:50px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      <span id="selected-empty"
-        style="color:#aaa;font-size:14px">
+    <!-- Selected bar -->
+    <div id="selected-bar"
+      style="background:var(--light);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;min-height:52px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">
+      <span id="selected-empty" style="color:var(--muted);font-size:13px">
         Tap pictograms to build a sentence
       </span>
     </div>
 
     <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn-primary" id="speak-btn"
-        style="flex:2" onclick="speakPictogram()">
-        Speak
+      <button class="btn-primary" id="speak-btn" style="flex:2" onclick="speakPictogram()">
+        Speak →
       </button>
-      <button class="btn-secondary"
-        style="flex:1" onclick="clearPictogram()">
+      <button class="btn-secondary" style="flex:1" onclick="clearPictogram()">
         Clear
       </button>
     </div>
 
-    <!-- Pictogram categories -->
-    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="cat-btn active" onclick="showCategory('basic')">Basic</button>
-      <button class="cat-btn" onclick="showCategory('feelings')">Feelings</button>
-      <button class="cat-btn" onclick="showCategory('food')">Food</button>
-      <button class="cat-btn" onclick="showCategory('body')">Body</button>
-      <button class="cat-btn" onclick="showCategory('actions')">Actions</button>
+    <!-- Categories -->
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      <button class="cat-btn active" onclick="showCategory('basic', this)">Basic</button>
+      <button class="cat-btn" onclick="showCategory('feelings', this)">Feelings</button>
+      <button class="cat-btn" onclick="showCategory('food', this)">Food</button>
+      <button class="cat-btn" onclick="showCategory('body', this)">Body</button>
+      <button class="cat-btn" onclick="showCategory('actions', this)">Actions</button>
     </div>
 
-    <!-- Pictogram grid -->
     <div class="picto-grid" id="picto-grid"></div>
-
   </div>
 
-  <!-- EYE TRACKING MODE -->
-  <div id="section-eye" style="display:none">
-    <div class="card" style="text-align:center;margin-bottom:12px">
-      <p style="font-size:13px;color:#888">
-        Look at a pictogram for 1 second to select it
-      </p>
-      <button class="btn-secondary"
-        onclick="switchToTouch()">
-        Switch to Touch instead
-      </button>
-    </div>
-
-    <!-- Same selected bar -->
-    <div id="eye-selected-bar" class="card"
-      style="min-height:50px;display:flex;flex-wrap:wrap;gap:8px;align-items:center">
-      <span id="eye-selected-empty"
-        style="color:#aaa;font-size:14px">
-        Look at pictograms to build a sentence
-      </span>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn-primary" id="eye-speak-btn"
-        style="flex:2" onclick="speakEyePictogram()">
-        Speak
-      </button>
-      <button class="btn-secondary"
-        style="flex:1" onclick="clearEyePictogram()">
-        Clear
-      </button>
-    </div>
-
-    <div class="picto-grid" id="eye-picto-grid"></div>
-  </div>
-
-  <!-- Quick phrase history -->
+  <!-- History -->
   <div style="margin-top:24px">
-    <h2 style="margin-bottom:10px;font-size:15px;color:#888">
-      Recent phrases — tap to repeat
-    </h2>
-    <div id="history-list"></div>
+    <h3>Recent phrases</h3>
+    <div id="history-list">
+      <p style="color:var(--muted);font-size:13px">No recent phrases yet</p>
+    </div>
   </div>
 
 </div>

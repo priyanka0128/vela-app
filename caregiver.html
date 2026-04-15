@@ -9,74 +9,96 @@
 <body>
 <div class="page">
 
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-    <a href="home.html" style="font-size:13px;color:#1a3a5c">← Back</a>
-    <h1>Caregiver mode</h1>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
+    <h1>Caregiver</h1>
   </div>
 
   <!-- PIN gate -->
   <div id="pin-gate">
-    <div class="card">
-      <p>Enter the caregiver PIN to access settings.</p>
-      <label>PIN (default: 1234)</label>
+    <div class="card" style="text-align:center;padding:32px 20px">
+      <div style="font-size:48px;margin-bottom:14px">🔒</div>
+      <h2 style="margin-bottom:6px">Caregiver access</h2>
+      <p style="font-size:14px">Enter your PIN to manage patient settings</p>
       <input type="password" id="pin-input"
-        placeholder="Enter PIN" maxlength="6">
-      <button class="btn-primary" onclick="checkPin()">
-        Enter
-      </button>
+        placeholder="Enter PIN"
+        maxlength="6"
+        style="text-align:center;font-size:20px;letter-spacing:.3em;margin-bottom:14px">
+      <button class="btn-primary" onclick="checkPin()">Enter →</button>
+      <p style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:0">
+        Default PIN is 1234
+      </p>
     </div>
   </div>
 
-  <!-- Caregiver panel (hidden until PIN correct) -->
+  <!-- Caregiver panel -->
   <div id="carer-panel" style="display:none">
 
-    <div class="card">
-      <h2>Patient profile</h2><br>
-      <div id="patient-info"></div>
+    <!-- Patient info -->
+    <div class="voice-card" style="margin-bottom:16px">
+      <div style="font-size:12px;opacity:.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:500">
+        Current patient
+      </div>
+      <div class="voice-card-name" id="patient-name-display">—</div>
+      <div class="voice-card-sub" id="patient-details-display">—</div>
     </div>
 
+    <!-- Add phrase -->
     <div class="card">
-      <h2>Add custom phrase</h2><br>
-      <label>Phrase to add</label>
-      <input type="text" id="custom-phrase"
-        placeholder="e.g. I need my medication">
-      <button class="btn-primary" onclick="addPhrase()">
-        Add Phrase
-      </button>
+      <h2>Add quick phrase</h2>
+      <p style="font-size:13px">These appear as instant-tap options on the communication screen</p>
+      <label>Phrase text</label>
+      <input type="text" id="phrase-input" placeholder="e.g. I need my medication now">
+      <button class="btn-primary" onclick="addPhrase()">Add phrase →</button>
     </div>
 
+    <!-- Saved phrases -->
     <div class="card">
-      <h2>Saved phrases</h2><br>
-      <div id="saved-phrases"></div>
+      <h2>Saved phrases</h2>
+      <div id="phrases-list">
+        <p style="color:var(--muted);font-size:13px">No phrases added yet</p>
+      </div>
     </div>
 
+    <!-- All patient voices — caregiver only -->
+<div class="card">
+  <h2>All patient voices</h2>
+  <p style="font-size:13px">Test and assign any stored patient voice to the current session.</p>
+  <div id="all-voices-container">
+    <p style="color:var(--muted);font-size:13px">Loading...</p>
+  </div>
+</div>
+
+    <!-- Accessibility -->
     <div class="card">
-      <h2>Accessibility</h2><br>
-      <label>
-        <input type="checkbox" id="hc-toggle"
-          onchange="toggleHighContrast()">
-        &nbsp; High contrast mode
-      </label><br><br>
-      <label>
-        <input type="checkbox" id="lt-toggle"
-          onchange="toggleLargeText()">
-        &nbsp; Large text mode
-      </label>
+      <h2>Accessibility settings</h2>
+      <div class="check-row" onclick="toggleHighContrast()">
+        <input type="checkbox" id="hc-toggle">
+        <div class="check-row-text">
+          <strong>High contrast mode</strong><br>
+          <span style="color:var(--muted);font-size:13px">Black background for easier reading</span>
+        </div>
+      </div>
+      <div class="check-row" onclick="toggleLargeText()">
+        <input type="checkbox" id="lt-toggle">
+        <div class="check-row-text">
+          <strong>Large text</strong><br>
+          <span style="color:var(--muted);font-size:13px">Increase text size throughout app</span>
+        </div>
+      </div>
     </div>
 
+    <!-- Change PIN -->
     <div class="card">
-      <h2>Change PIN</h2><br>
+      <h2>Change PIN</h2>
       <input type="password" id="new-pin"
-        placeholder="New PIN (numbers only)" maxlength="6">
-      <button class="btn-primary" onclick="changePin()">
-        Save new PIN
-      </button>
+        placeholder="New PIN (4–6 digits)"
+        maxlength="6">
+      <button class="btn-primary" onclick="changePin()">Save new PIN</button>
     </div>
 
-    <button class="btn-secondary"
-      style="width:100%;margin-top:10px"
-      onclick="window.location.href='home.html'">
-      Back to patient view
+    <button class="btn-secondary" onclick="window.location.href='home.html'">
+      ← Back to patient view
     </button>
 
   </div>

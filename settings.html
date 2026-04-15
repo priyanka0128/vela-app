@@ -9,13 +9,34 @@
 <body>
 <div class="page">
 
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
-    <a href="home.html" style="font-size:13px;color:#1a3a5c">← Back</a>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
     <h1>Settings</h1>
   </div>
 
+  <!-- Voice status -->
+  <div class="voice-card" id="voice-status-card" style="margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div class="voice-card-name" id="settings-voice-name">No voice cloned</div>
+        <div class="voice-card-sub" id="settings-voice-sub">Visit Voice Bank to add your voice</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button onclick="testSettingsVoice()"
+          style="padding:8px 14px;border-radius:8px;border:1.5px solid rgba(255,255,255,.3);background:transparent;color:#fff;font-size:12px;font-weight:500;cursor:pointer">
+          Test ▶
+        </button>
+        <button onclick="window.location.href='voicebank.html'"
+          style="padding:8px 14px;border-radius:8px;border:none;background:rgba(255,255,255,.2);color:#fff;font-size:12px;font-weight:500;cursor:pointer">
+          Manage
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile -->
   <div class="card">
-    <h2>Profile</h2><br>
+    <h2>Profile</h2>
     <label>Name</label>
     <input type="text" id="s-name" placeholder="Your name">
     <label>Region</label>
@@ -25,6 +46,7 @@
       <option value="Ireland">Ireland</option>
       <option value="UK">UK</option>
       <option value="USA">USA</option>
+      <option value="France">France</option>
     </select>
     <label>Language</label>
     <select id="s-lang">
@@ -33,76 +55,106 @@
       <option value="en-IE">English (Ireland)</option>
       <option value="en-GB">English (UK)</option>
       <option value="en-US">English (USA)</option>
+      <option value="fr-FR">French</option>
     </select>
   </div>
 
+  <!-- Communication style -->
   <div class="card">
-    <h2>Communication style</h2><br>
+    <h2>Communication style</h2>
     <label>Tone</label>
     <select id="s-tone">
-      <option value="casual">Casual</option>
-      <option value="formal">Formal</option>
+      <option value="casual">Casual — natural and warm</option>
+      <option value="formal">Formal — professional</option>
     </select>
     <label>Humour</label>
     <select id="s-humour">
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
+      <option value="low">Low — sincere and straightforward</option>
+      <option value="medium">Medium — light and friendly</option>
+      <option value="high">High — playful and expressive</option>
     </select>
     <label>Slang</label>
     <select id="s-slang">
-      <option value="none">None</option>
-      <option value="low">Low</option>
-      <option value="medium">Medium</option>
-      <option value="high">High</option>
+      <option value="none">None — clean language</option>
+      <option value="low">Low — occasional expressions</option>
+      <option value="medium">Medium — regional phrases</option>
+      <option value="high">High — full dialect</option>
+    </select>
+    <label>Energy</label>
+    <select id="s-energy">
+      <option value="low">Low — calm and gentle</option>
+      <option value="medium">Medium — balanced</option>
+      <option value="high">High — expressive and vibrant</option>
     </select>
   </div>
 
+  <!-- Mode -->
   <div class="card">
-    <h2>Communication mode</h2><br>
+    <h2>Communication mode</h2>
+    <p style="font-size:13px">Choose the input method that works best right now</p>
     <select id="s-mode">
-      <option value="voice">Voice</option>
-      <option value="text">Text</option>
-      <option value="touch">Touch pictograms</option>
-      <option value="eye">Eye tracking</option>
+      <option value="voice">Voice — speak to communicate</option>
+      <option value="text">Text — type to communicate</option>
+      <option value="touch">Touch — tap pictograms</option>
+      <option value="eye">Eye tracking — look to communicate</option>
     </select>
   </div>
 
+  <!-- Accessibility -->
   <div class="card">
-    <h2>Accessibility</h2><br>
-    <label>
+    <h2>Accessibility</h2>
+    <div class="check-row" onclick="toggleCheck('s-hc')">
       <input type="checkbox" id="s-hc">
-      &nbsp; High contrast
-    </label><br><br>
-    <label>
+      <div class="check-row-text">
+        <strong>High contrast</strong><br>
+        <span style="color:var(--muted);font-size:13px">Black background, white text — easier to read</span>
+      </div>
+    </div>
+    <div class="check-row" onclick="toggleCheck('s-lt')">
       <input type="checkbox" id="s-lt">
-      &nbsp; Large text
-    </label>
+      <div class="check-row-text">
+        <strong>Large text</strong><br>
+        <span style="color:var(--muted);font-size:13px">Bigger fonts throughout the app</span>
+      </div>
+    </div>
   </div>
 
+  <!-- Data -->
   <div class="card">
-    <h2>Data</h2><br>
-    <button class="btn-secondary"
-      style="width:100%;margin-bottom:10px"
-      onclick="exportData()">
-      Export my data
+    <h2>Data & privacy</h2>
+    <button class="btn-secondary" style="margin-bottom:10px" onclick="exportData()">
+      Export my data (JSON)
     </button>
-    <button class="btn-danger"
-      style="width:100%"
-      onclick="clearData()">
-      Clear all data
+    <button class="btn-danger" onclick="clearData()">
+      Clear all data & start over
     </button>
   </div>
+
+<div class="card">
+  <h2>Condition progression</h2>
+  <p style="font-size:13px">As the condition changes, Vela adapts the interface automatically.</p>
+  <label>Current stage</label>
+  <select id="s-stage">
+    <option value="1">Stage 1 — Can speak, type and move freely</option>
+    <option value="2">Stage 2 — Some difficulty speaking or typing</option>
+    <option value="3">Stage 3 — Limited movement, using pictograms</option>
+    <option value="4">Stage 4 — Eye movement only</option>
+  </select>
+</div>
 
   <button class="btn-primary" onclick="saveSettings()">
-    Save settings
+    Save settings ✓
   </button>
 
 </div>
 
 <script src="js/app.js"></script>
 <script>
-// Load current settings
+function toggleCheck(id) {
+  const el = document.getElementById(id);
+  el.checked = !el.checked;
+}
+
 window.addEventListener('DOMContentLoaded', () => {
   const p = getProfile();
   if (p.name)   document.getElementById('s-name').value   = p.name;
@@ -111,9 +163,20 @@ window.addEventListener('DOMContentLoaded', () => {
   if (p.tone)   document.getElementById('s-tone').value   = p.tone;
   if (p.humour) document.getElementById('s-humour').value = p.humour;
   if (p.slang)  document.getElementById('s-slang').value  = p.slang;
+  if (p.energy) document.getElementById('s-energy').value = p.energy;
   if (p.mode)   document.getElementById('s-mode').value   = p.mode;
+  if (p.stage) document.getElementById('s-stage').value = p.stage;
   document.getElementById('s-hc').checked = !!p.highContrast;
   document.getElementById('s-lt').checked = !!p.largeText;
+
+  const vn = document.getElementById('settings-voice-name');
+  const vs = document.getElementById('settings-voice-sub');
+  const vc = document.getElementById('voice-status-card');
+  if (p.voiceId) {
+    vn.textContent = '✓ ' + (p.voiceName || 'Voice cloned');
+    vs.textContent = 'Cloned voice active · Voice ID: ' + p.voiceId.substring(0,12) + '...';
+    vc.style.background = 'linear-gradient(135deg, #064e3b 0%, #0d9488 100%)';
+  }
 });
 
 function saveSettings() {
@@ -125,34 +188,48 @@ function saveSettings() {
     tone:         document.getElementById('s-tone').value,
     humour:       document.getElementById('s-humour').value,
     slang:        document.getElementById('s-slang').value,
+    energy:       document.getElementById('s-energy').value,
     mode:         document.getElementById('s-mode').value,
     highContrast: document.getElementById('s-hc').checked,
-    largeText:    document.getElementById('s-lt').checked
+    largeText:    document.getElementById('s-lt').checked,
+    stage:        document.getElementById('s-stage').value
   });
   saveProfile(p);
+  if (p.highContrast) document.body.classList.add('hc');
+  else document.body.classList.remove('hc');
+  if (p.largeText) document.body.classList.add('large');
+  else document.body.classList.remove('large');
   alert('Settings saved!');
   window.location.href = 'home.html';
+}
+
+function testSettingsVoice() {
+  const p = getProfile();
+  if (!p.voiceId) {
+    alert('No cloned voice. Go to Voice Bank first.');
+    return;
+  }
+  speakText('Testing my cloned voice through Vela.');
 }
 
 function exportData() {
   const data = {
     profile: getProfile(),
-    history: getHistory()
+    history: getHistory(),
+    voices:  JSON.parse(localStorage.getItem('vela_voice_bank') || '[]')
   };
-  const blob = new Blob(
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(new Blob(
     [JSON.stringify(data, null, 2)],
     { type: 'application/json' }
-  );
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
+  ));
   a.download = 'vela-data.json';
   a.click();
 }
 
 function clearData() {
-  if (confirm('This will delete all your data. Are you sure?')) {
+  if (confirm('This deletes everything including your voice profile. Are you sure?')) {
     localStorage.clear();
-    alert('All data cleared.');
     window.location.href = 'index.html';
   }
 }

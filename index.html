@@ -3,76 +3,99 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Vela</title>
+  <title>Vela — Your Voice, Always</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="page">
 
-  <h1>Welcome to Vela</h1>
-  <p>Your personal communication assistant.</p>
-  <p>Before we begin, we need your permission to use certain features.</p>
-
-  <div class="card">
-    <h2>Please agree to the following</h2>
-    <br>
-    <label>
-      <input type="checkbox" id="c1">
-      &nbsp; Record and clone your voice using AI
-    </label><br><br>
-    <label>
-      <input type="checkbox" id="c2">
-      &nbsp; Use AI to rewrite text in your personal style
-    </label><br><br>
-    <label>
-      <input type="checkbox" id="c3">
-      &nbsp; Store your profile on this device
-    </label><br><br>
-    <label>
-      <input type="checkbox" id="c4">
-      &nbsp; Access microphone and camera when needed
-    </label>
+  <div style="text-align:center;padding:32px 0 24px">
+<div style="text-align:center;padding:32px 0 24px">
+  <img src="assets/logo.png"
+    alt="Vela"
+    style="width:120px;height:auto;margin-bottom:12px;border-radius:8px">
+  <p style="font-size:16px;color:var(--muted);margin:0">
+    Your voice, preserved forever
+  </p>
+</div>   
   </div>
 
   <div class="card">
-    <label>I am a:</label>
+    <h2>Before we begin</h2>
+    <p style="font-size:14px">Vela needs your permission to work. Please read and agree to each item below.</p>
+
+    <div class="check-row" onclick="toggle('c1')">
+      <input type="checkbox" id="c1">
+      <div class="check-row-text">
+        <strong>Voice recording & cloning</strong><br>
+        <span style="color:var(--muted);font-size:13px">We record your voice to create a personal AI clone that speaks for you</span>
+      </div>
+    </div>
+    <div class="check-row" onclick="toggle('c2')">
+      <input type="checkbox" id="c2">
+      <div class="check-row-text">
+        <strong>AI-powered communication</strong><br>
+        <span style="color:var(--muted);font-size:13px">AI rewrites your messages in your personal style and dialect</span>
+      </div>
+    </div>
+    <div class="check-row" onclick="toggle('c3')">
+      <input type="checkbox" id="c3">
+      <div class="check-row-text">
+        <strong>Local data storage</strong><br>
+        <span style="color:var(--muted);font-size:13px">Your profile and voice are stored securely on this device</span>
+      </div>
+    </div>
+    <div class="check-row" onclick="toggle('c4')">
+      <input type="checkbox" id="c4">
+      <div class="check-row-text">
+        <strong>Camera & microphone access</strong><br>
+        <span style="color:var(--muted);font-size:13px">Used for eye tracking and voice recording only</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <label>I am a</label>
     <select id="role">
       <option value="patient">Patient</option>
-      <option value="caregiver">Caregiver</option>
+      <option value="caregiver">Caregiver / Family member</option>
     </select>
   </div>
 
   <button class="btn-primary" onclick="startSetup()">
-    Get Started
+    Get started →
   </button>
+
+  <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px">
+    Your data never leaves your device without permission
+  </p>
 
 </div>
 
 <script src="js/app.js"></script>
 <script>
+function toggle(id) {
+  const el = document.getElementById(id);
+  el.checked = !el.checked;
+}
+
 function startSetup() {
-  const boxes = ['c1', 'c2', 'c3', 'c4'];
-  const allChecked = boxes.every(id =>
+  const all = ['c1','c2','c3','c4'].every(id =>
     document.getElementById(id).checked
   );
-
-  if (!allChecked) {
+  if (!all) {
     alert('Please agree to all permissions to continue.');
     return;
   }
-
-  const existing = getProfile();
+  const p = getProfile();
   saveProfile({
-    ...existing,
-    id: existing.id || Date.now().toString(),
-    role: document.getElementById('role').value,
+    ...p,
+    id:      p.id || Date.now().toString(),
+    role:    document.getElementById('role').value,
     consent: true
   });
-
   window.location.href = 'setup.html';
 }
 </script>
-
 </body>
 </html>

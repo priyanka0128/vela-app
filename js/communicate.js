@@ -130,68 +130,64 @@ function initVoice() {
   recognition.continuous = false;
   recognition.interimResults = true;
 
-  recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
-    document.getElementById('voice-status').textContent =
-      'Heard: ' + transcript;
-    if (e.results[0].isFinal) {
-      rewriteAndSpeak(transcript);
-    }
-  };
+recognition.onresult = (e) => {
+  const transcript = e.results[0][0].transcript;
+  const status = document.getElementById('voice-status');
+  status.textContent = 'Heard: "' + transcript + '"';
+  status.style.color = 'var(--blue)';
+  if (e.results[0].isFinal) {
+    rewriteAndSpeak(transcript);
+  }
+}};
 
   recognition.onerror = (e) => {
-    document.getElementById('voice-status').textContent =
-      'Error: ' + e.error + '. Try again.';
-    document.getElementById('mic-btn').textContent =
-      '🎤 Start Speaking';
-    isRecording = false;
-  };
+  const status = document.getElementById('voice-status');
+  if (e.error === 'no-speech') {
+    status.textContent = 'No speech heard — try again';
+  } else if (e.error === 'not-allowed') {
+    status.textContent = 'Microphone blocked — allow access in browser';
+  } else {
+    status.textContent = 'Error: ' + e.error;
+  }
+  status.style.color = '#dc2626';
+  document.getElementById('mic-btn').textContent = '🎤';
+  document.getElementById('mic-btn').style.background = 'var(--navy)';
+  isRecording = false;
+};
 
   recognition.onend = () => {
-    document.getElementById('mic-btn').textContent =
-      '🎤 Start Speaking';
-    isRecording = false;
-  };
-}
+  document.getElementById('mic-btn').textContent      = '🎤';
+  document.getElementById('mic-btn').style.background = 'var(--navy)';
+  isRecording = false;
+};
 
 function toggleVoice() {
   if (!recognition) { initVoice(); }
+  const btn    = document.getElementById('mic-btn');
+  const status = document.getElementById('voice-status');
+
   if (isRecording) {
     recognition.stop();
-    document.getElementById('mic-btn').textContent =
-      '🎤 Start Speaking';
+    btn.textContent     = '🎤';
+    btn.style.background = 'var(--navy)';
+    btn.style.boxShadow  = '0 4px 20px rgba(15,39,68,.35)';
+    status.textContent   = 'Press the button and speak';
+    status.style.color   = 'var(--muted)';
     isRecording = false;
   } else {
-    recognition.start();
-    document.getElementById('mic-btn').textContent =
-      '⏹ Stop';
-    document.getElementById('voice-status').textContent =
-      'Listening...';
-    isRecording = true;
+    try {
+      recognition.start();
+      btn.textContent     = '⏹';
+      btn.style.background = '#dc2626';
+      btn.style.boxShadow  = '0 4px 20px rgba(220,38,38,.4)';
+      status.innerHTML     = '<span class="record-pulse"></span> Listening...';
+      status.style.color   = '#dc2626';
+      isRecording = true;
+    } catch(e) {
+      status.textContent = 'Could not start — try again';
+    }
   }
 }
-
-// ── TEXT MODE ────────────────────────────────────────
-function sendText() {
-  const input = document.getElementById('text-input');
-  const text  = input.value.trim();
-  if (!text) { alert('Please type something first.'); return; }
-  rewriteAndSpeak(text);
-  input.value = '';
-}
-
-// Allow Enter key to submit text
-document.addEventListener('DOMContentLoaded', () => {
-  const ta = document.getElementById('text-input');
-  if (ta) {
-    ta.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendText();
-      }
-    });
-  }
-});
 // ── PICTOGRAM MODE ───────────────────────────────────
 function renderGrid(category) {
   currentCategory = category;
@@ -468,5 +464,4 @@ function switchMode(mode) {
     if (modeLabel) {
   modeLabel.textContent =
     mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode';
-}
-}
+}}

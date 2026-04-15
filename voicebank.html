@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Voice — Vela</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="page">
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px">
+    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
+    <h1>My voice</h1>
+  </div>
+  <p id="page-subtitle">Record or upload your voice so Vela speaks for you.</p>
+
+  <!-- Current voice status -->
+  <div id="current-voice-card" class="voice-card" style="margin-bottom:20px">
+    <div style="font-size:12px;opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em;font-weight:500">My voice</div>
+    <div class="voice-card-name" id="my-voice-name">No voice recorded yet</div>
+    <div class="voice-card-sub" id="my-voice-sub">Record or upload below to clone your voice</div>
+  </div>
+
+  <!-- Record / Upload -->
+  <div class="card">
+    <h2>Record or upload my voice</h2>
+    <p style="font-size:13px">Speak naturally for 30–60 seconds. Any topic — a memory, how you feel, anything.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+      <button id="rec-btn"
+        style="padding:16px 10px;border-radius:var(--radius-sm);border:2px solid var(--navy);background:var(--navy);color:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px"
+        onclick="startRec()">
+        🎤 Record voice
+      </button>
+      <button
+        style="padding:16px 10px;border-radius:var(--radius-sm);border:2px solid var(--border);background:var(--surface);color:var(--blue);font-size:14px;font-weight:600;cursor:pointer"
+        onclick="document.getElementById('voice-file').click()">
+        📁 Upload file
+      </button>
+    </div>
+
+    <input type="file" id="voice-file" accept="audio/*,.opus,.mp3,.wav,.m4a,.ogg" style="display:none" onchange="handleUpload(this)">
+
+    <div id="rec-status"
+      style="padding:14px;background:var(--light);border-radius:var(--radius-sm);border:1px solid var(--border);font-size:13px;color:var(--muted);text-align:center;margin-bottom:10px">
+      No recording yet
+    </div>
+
+    <audio id="voice-preview" controls style="width:100%;display:none;margin-bottom:12px;border-radius:8px"></audio>
+
+    <button id="clone-btn" class="btn-primary" style="display:none" onclick="cloneMyVoice()">
+      ✨ Save and clone my voice
+    </button>
+    <div id="clone-progress" style="font-size:12px;color:var(--muted);text-align:center;margin-top:8px"></div>
+  </div>
+
+  <!-- My saved voices -->
+  <div>
+    <h3 style="margin-bottom:12px">My saved voices</h3>
+    <div id="my-voices-list"></div>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script>
+let blob = null, rec = null, chunks = [], isRec = false;
+
+window.addEventListener('DOMContentLoaded', () => {
+  const p = getProfile();
+  document.getElementById('page-subtitle').textContent =
+    'Hello ' + (p.name || 'there') + ' — manage your personal voice here.';
+  renderMyVoices();
+  updateCurrentVoiceCard();
+});
+
+function updateCurrentVoiceCard() {
+  const p    = getProfile();
+  const myVoices = getUserVoices();
+  const mine = myVoices.find(v => v.voiceId === p.voiceId);
+  const nm   = document.getElementById('my-voice-name');
+  const sub  = document.getElementById('my-voice-sub');
+  const card = document.getElementById('current-voice-card');
+  if (p.voiceId && mine) {
+    nm.textContent  = '✓ ' + (mine.label || p.voiceName || 'Voice cloned');
+    sub.textContent = 'Active — all messages speak in your voice';
+    card.style.background = 'linear-gradient(135deg,#064e3b 0%,#0d9488 100%)';
+  } else {
+    nm.textContent  = 'No voice recorded yet';
+    sub.textContent = 'Record or upload below to clone your voice';
+  }
+}
+
+function renderMyVoices() {
+  const voices = getUserVoices();
+  const p      = getProfile();
+  const list   = document.getElementById('my-voices-list');
+  list.innerHTML = '';
+
+  if (!voices.length) {
+    list.innerHTML = `
+      <div class="card-flat" style="text-align:center;padding:24px">
+        <div style="font-size:32px;margin-bottom:8px">🎤</div>
+        <div style="font-size:14px;color:var(--muted)">
+          No voices saved yet — record above to get started
+        </div>
+      </div>`;
+    return;
+  }
+
+  voices.forEach((v, i) => {
+    const isActive = p.voiceId === v.voiceId;
+    const card = document.createElement('div');
+    card.className = 'voice-bank-card' + (isActive ? ' active' : '');
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;
+        align-items:center;margin-bottom:10px">
+        <div>
+          <div style="font-size:15px;font-weight:600;color:var(--navy)">
+            ${v.label || 'My voice ' + (i + 1)}
+          </div>
+          <div style="font-size:11px;color:var(--muted)">
+            Saved ${new Date(v.addedAt).toLocaleDateString('en-IE', {
+              day:'numeric', month:'short', year:'numeric'
+            })}
+          </div>
+        </div>
+        ${isActive
+          ? '<span class="badge badge-blue">✓ Active</span>'
+          : '<span class="badge badge-green">Saved</span>'}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <button onclick="testMyVoice('${v.voiceId}')"
+          style="padding:9px;border-radius:8px;
+          border:1.5px solid var(--border);background:var(--surface);
+          color:var(--blue);font-size:12px;font-weight:500;cursor:pointer">
+          ▶ Test
+        </button>
+        <button onclick="activateMyVoice(${i})"
+          style="padding:9px;border-radius:8px;border:none;
+          background:${isActive ? 'var(--teal)' : 'var(--navy)'};
+          color:#fff;font-size:12px;font-weight:600;cursor:pointer">
+          ${isActive ? '✓ Active' : 'Use this'}
+        </button>
+        <button onclick="deleteMyVoice(${i})"
+          style="padding:9px;border-radius:8px;
+          border:1.5px solid #fecaca;background:#fef2f2;
+          color:var(--red);font-size:12px;cursor:pointer">
+          Delete
+        </button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+async function startRec() {
+  if (isRec) { stopRec(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    chunks = [];
+    rec    = new MediaRecorder(stream);
+    rec.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    rec.onstop = () => {
+      blob = new Blob(chunks, { type: 'audio/webm' });
+      const url = URL.createObjectURL(blob);
+      document.getElementById('voice-preview').src     = url;
+      document.getElementById('voice-preview').style.display = 'block';
+      document.getElementById('rec-status').textContent =
+        '✓ Recording saved — press Clone to save';
+      document.getElementById('rec-status').style.color = 'var(--green)';
+      document.getElementById('clone-btn').style.display = 'block';
+      stream.getTracks().forEach(t => t.stop());
+    };
+    rec.start();
+    isRec = true;
+    const btn = document.getElementById('rec-btn');
+    btn.innerHTML         = '<span class="record-pulse"></span> Stop recording';
+    btn.style.background  = 'var(--red)';
+    btn.style.borderColor = 'var(--red)';
+    document.getElementById('rec-status').innerHTML =
+      '<span class="record-pulse"></span> Recording... speak naturally';
+    document.getElementById('rec-status').style.color = 'var(--red)';
+  } catch(err) { alert('Microphone access needed.'); }
+}
+
+function stopRec() {
+  if (rec && rec.state === 'recording') rec.stop();
+  isRec = false;
+  const btn = document.getElementById('rec-btn');
+  btn.innerHTML         = '🎤 Record voice';
+  btn.style.background  = 'var(--navy)';
+  btn.style.borderColor = 'var(--navy)';
+}
+
+function handleUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  blob = file;
+  document.getElementById('voice-preview').src =
+    URL.createObjectURL(file);
+  document.getElementById('voice-preview').style.display = 'block';
+  document.getElementById('rec-status').textContent =
+    '✓ File loaded: ' + file.name;
+  document.getElementById('rec-status').style.color = 'var(--green)';
+  document.getElementById('clone-btn').style.display = 'block';
+}
+
+async function cloneMyVoice() {
+  if (!blob) { alert('Please record or upload audio first.'); return; }
+  const p    = getProfile();
+  const btn  = document.getElementById('clone-btn');
+  const prog = document.getElementById('clone-progress');
+
+  btn.disabled    = true;
+  btn.textContent = 'Cloning voice...';
+  prog.textContent = 'Sending to ElevenLabs — takes about 30 seconds...';
+
+  try {
+    const base64 = await blobToBase64(blob);
+    const res = await fetch('/api/clone-voice', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        audioBase64: base64,
+        fileName:    'voice.webm',
+        voiceName:   (p.name || 'Patient') + ' Voice'
+      })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Save to this user's private voice bank
+    const voices = getUserVoices();
+    voices.push({
+      label:     (p.name || 'My voice') + ' · ' +
+                 new Date().toLocaleDateString(),
+      voiceId:   data.voiceId,
+      voiceName: data.voiceName,
+      addedAt:   Date.now()
+    });
+    saveUserVoices(voices);
+
+    // Register with caregiver
+    registerVoiceForCaregiver(
+      data.voiceId,
+      data.voiceName,
+      p.name || 'Unknown patient',
+      p.id
+    );
+
+    // Set as active
+    p.voiceId   = data.voiceId;
+    p.voiceName = data.voiceName;
+    saveProfile(p);
+
+    // Reset UI
+    prog.textContent = '';
+    btn.disabled     = false;
+    btn.textContent  = '✨ Save and clone my voice';
+    btn.style.display = 'none';
+    blob = null;
+    document.getElementById('voice-preview').style.display = 'none';
+    document.getElementById('rec-status').textContent =
+      'No recording yet';
+    document.getElementById('rec-status').style.color = 'var(--muted)';
+
+    updateCurrentVoiceCard();
+    renderMyVoices();
+    alert('✓ Voice cloned and saved!');
+
+  } catch(err) {
+    prog.textContent = 'Error: ' + err.message;
+    btn.disabled     = false;
+    btn.textContent  = '✨ Save and clone my voice';
+    console.error(err);
+  }
+}
+
+async function testMyVoice(voiceId) {
+  const res = await fetch('/api/speak-cloned', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      text:    'Hello, this is my voice speaking through Vela.',
+      voiceId: voiceId
+    })
+  });
+  const ct = res.headers.get('content-type') || '';
+  if (res.ok && ct.includes('audio')) {
+    new Audio(URL.createObjectURL(await res.blob())).play();
+  } else {
+    alert('Voice test failed — check ElevenLabs connection.');
+  }
+}
+
+function activateMyVoice(i) {
+  const voices = getUserVoices();
+  const v = voices[i];
+  const p = getProfile();
+  p.voiceId   = v.voiceId;
+  p.voiceName = v.voiceName;
+  saveProfile(p);
+  updateCurrentVoiceCard();
+  renderMyVoices();
+}
+
+function deleteMyVoice(i) {
+  const voices = getUserVoices();
+  if (!confirm('Delete this voice?')) return;
+  const p = getProfile();
+  if (p.voiceId === voices[i].voiceId) {
+    p.voiceId = null; p.voiceName = null;
+    saveProfile(p);
+  }
+  voices.splice(i, 1);
+  saveUserVoices(voices);
+  updateCurrentVoiceCard();
+  renderMyVoices();
+}
+
+function blobToBase64(b) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onloadend = () => res(r.result.split(',')[1]);
+    r.onerror   = rej;
+    r.readAsDataURL(b);
+  });
+}
+</script>
