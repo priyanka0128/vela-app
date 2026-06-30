@@ -1,34 +1,41 @@
+// ═══════════════════════════════════════════════════════════
+// VELA — Local development server
+// In production, Vercel serverless functions in /api/ handle routes.
+// This server.js mirrors them for `node server.js` local dev.
+// ═══════════════════════════════════════════════════════════
+import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
-import { config } from 'dotenv';
+import multer from 'multer';
+import path from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { rewrite } from './api/rewrite.js';
+import { cloneVoice } from './api/clone-voice.js';
+import { speakCloned } from './api/speak-cloned.js';
+import { suggestResponses } from './api/suggest-responses.js';
 
-config({ path: '.env.local' });
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname  = dirname(__filename);
-
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static('./'));
+const upload = multer({ limits: { fileSize: 50 * 1024 * 1024 } });
 
-import rewrite     from './api/rewrite.js';
-import cloneSpeak  from './api/clone-speak.js';
-import cloneVoice  from './api/clone-voice.js';
-import speakCloned from './api/speak-cloned.js';
-import saveUser    from './api/save-user.js';
-import getUser     from './api/get-user.js';
+app.use(express.json({ limit: '10mb' }));
+app.use(express.static(__dirname));
 
-app.post('/api/rewrite',      (req, res) => rewrite(req, res));
-app.post('/api/clone-speak',  (req, res) => cloneSpeak(req, res));
-app.post('/api/clone-voice',  (req, res) => cloneVoice(req, res));
-app.post('/api/speak-cloned', (req, res) => speakCloned(req, res));
-app.post('/api/save-user',    (req, res) => saveUser(req, res));
-app.get('/api/get-user',      (req, res) => getUser(req, res));
+// Wrap Vercel-style handlers for Express
+const wrap = (handler) => async (req, res) => {
+  try { await handler(req, res); }
+  catch (e) {
+    console.error('Handler error:', e);
+    res.status(500).json({ error: e.message });
+  }
+};
 
-app.listen(3000, () => {
-  console.log('Vela running at http://localhost:3000');
+app.post('/api/rewrite', wrap(rewrite));
+app.post('/api/clone-voice', upload.single('audio'), wrap(cloneVoice));
+app.post('/api/speak-cloned', wrap(speakCloned));
+app.post('/api/suggest-responses', wrap(suggestResponses));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Vela running at http://localhost:${PORT}`);
+  console.log(`Landing page: http://localhost:${PORT}/landing.html`);
 });

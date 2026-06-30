@@ -1,150 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Communicate — Vela</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Communicate — Vela</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title">Communicate</span>
+    <div class="topnav-actions">
+      <a href="home.html" class="btn btn-ghost">← Home</a>
+    </div>
+  </div>
+</nav>
+
 <div class="page">
 
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-    <div style="display:flex;align-items:center;gap:8px">
-    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
-    </div>
-    <div id="speaking-indicator" style="display:none;align-items:center;gap:8px">
-      <div class="speaking-wave">
-        <span></span><span></span><span></span><span></span><span></span>
-      </div>
-      <span style="font-size:12px;color:var(--accent);font-weight:500">Speaking...</span>
-    </div>
-    <a href="settings.html"
-      style="font-size:13px;color:var(--muted);text-decoration:none">
-      ⚙
-    </a>
-  </div>
-
   <!-- Output -->
-  <div class="output-box" id="output-text">
-    Your message will appear here...
+  <div class="output-box muted" id="output">Choose a mode and start speaking...</div>
+
+  <!-- Sentence builder (pictograms mode) -->
+  <div class="sentence-bar hidden" id="sentence-bar">
+    <span class="text-soft text-sm" id="sentence-empty">Tap pictograms to build a sentence</span>
   </div>
 
-  <!-- Replay + Emotions -->
-  <div style="display:flex;gap:8px;margin-bottom:14px">
-    <button onclick="replayLast()"
-      style="flex:1;padding:11px;border-radius:var(--radius-sm);border:1.5px solid var(--border);background:var(--surface);font-size:13px;font-weight:500;color:var(--blue);cursor:pointer">
-      ↺ Replay
-    </button>
-    <button class="emotion-btn" onclick="playEmotion('laugh')">😄</button>
-    <button class="emotion-btn" onclick="playEmotion('cry')">😢</button>
-    <button class="emotion-btn" onclick="playEmotion('sigh')">😮‍💨</button>
-    <button class="emotion-btn" onclick="playEmotion('frustration')">😤</button>
-  </div>
-
-<!-- Mode tabs -->
-  <div class="mode-tabs">
-    <button class="mode-tab" id="tab-voice" onclick="switchMode('voice')">
-      🗣 Voice
-    </button>
-    <button class="mode-tab" id="tab-text" onclick="switchMode('text')">
-      ⌨ Text
-    </button>
-    <button class="mode-tab" id="tab-touch" onclick="switchMode('touch')">
-      👆 Pictos
-    </button>
-    <button class="mode-tab" onclick="window.location.href='eyetrack.html'">
-      👁 Eyes
-    </button>
-  </div>
-
-  <!-- VOICE MODE -->
-  <div id="section-voice" style="display:none">
-    <div class="card" style="text-align:center;padding:40px 20px">
-      <button id="mic-btn"
-        onclick="toggleVoice()"
-        style="width:90px;height:90px;border-radius:50%;
-        border:none;background:var(--navy);
-        font-size:36px;cursor:pointer;
-        display:block;margin:0 auto 20px;
-        box-shadow:0 4px 20px rgba(15,39,68,.35);
-        transition:all .2s">
-        🎤
+  <!-- Emotion grid -->
+  <div class="card" style="padding:18px;margin-bottom:14px">
+    <div class="row-between mb-2">
+      <span class="label" style="margin:0">Emotional tone</span>
+      <span class="badge badge-lime" id="emo-current">Neutral</span>
+    </div>
+    <div class="emo-grid">
+      <button class="emo-btn active" data-emo="neutral" onclick="selectEmotion('neutral',this)">
+        <span class="emo-emoji">😐</span>
+        <span class="emo-label">Neutral</span>
       </button>
-      <div id="voice-status"
-        style="font-size:14px;color:var(--muted);margin-bottom:8px">
-        Press the button and speak
-      </div>
-      <div style="font-size:11px;color:#cbd5e1">
-        Chrome only · Allow microphone access
-      </div>
+      <button class="emo-btn" data-emo="happy" onclick="selectEmotion('happy',this)">
+        <span class="emo-emoji">😊</span>
+        <span class="emo-label">Happy</span>
+      </button>
+      <button class="emo-btn" data-emo="sad" onclick="selectEmotion('sad',this)">
+        <span class="emo-emoji">😢</span>
+        <span class="emo-label">Sad</span>
+      </button>
+      <button class="emo-btn" data-emo="calm" onclick="selectEmotion('calm',this)">
+        <span class="emo-emoji">😌</span>
+        <span class="emo-label">Calm</span>
+      </button>
+      <button class="emo-btn" data-emo="urgent" onclick="selectEmotion('urgent',this)">
+        <span class="emo-emoji">🚨</span>
+        <span class="emo-label">Urgent</span>
+      </button>
+      <button class="emo-btn" data-emo="gentle" onclick="selectEmotion('gentle',this)">
+        <span class="emo-emoji">🤲</span>
+        <span class="emo-label">Gentle</span>
+      </button>
+      <button class="emo-btn" data-emo="excited" onclick="selectEmotion('excited',this)">
+        <span class="emo-emoji">🤩</span>
+        <span class="emo-label">Excited</span>
+      </button>
+      <button class="emo-btn" data-emo="tender" onclick="selectEmotion('tender',this)">
+        <span class="emo-emoji">🥰</span>
+        <span class="emo-label">Tender</span>
+      </button>
     </div>
   </div>
 
-  <!-- TEXT MODE -->
-  <div id="section-text" style="display:none">
+  <!-- Mode tabs -->
+  <div class="tabs">
+    <div class="tab active" data-mode="voice" onclick="setMode('voice')">🎤 Voice</div>
+    <div class="tab" data-mode="text" onclick="setMode('text')">⌨️ Type</div>
+    <div class="tab" data-mode="picto" onclick="setMode('picto')">🖼️ Pictograms</div>
+  </div>
+
+  <!-- Voice mode -->
+  <div class="mode-panel" id="mode-voice">
+    <div class="card" style="text-align:center;padding:32px 24px">
+      <button class="mic-btn" id="mic-btn" onclick="toggleMic()">🎤</button>
+      <div style="font-size:14px;font-weight:600;color:var(--soft);margin-bottom:4px" id="mic-status">Tap to speak</div>
+      <div style="font-size:12px;color:var(--softer)">Vela will rewrite your speech in your style and speak it back</div>
+    </div>
+  </div>
+
+  <!-- Type mode -->
+  <div class="mode-panel hidden" id="mode-text">
     <div class="card">
-      <label style="font-size:13px;color:var(--muted);margin-bottom:8px;display:block">
-        Type what you want to say
-      </label>
-      <textarea id="text-input"
-        rows="4"
-        placeholder="Type here and press Speak..."
-        style="width:100%;padding:12px 14px;border:1.5px solid var(--border);
-        border-radius:var(--radius-sm);font-size:16px;
-        font-family:'DM Sans',sans-serif;resize:none;
-        margin-bottom:12px;line-height:1.5">
-      </textarea>
-      <button class="btn-primary" id="speak-btn" onclick="sendText()">
-        Speak in my voice →
+      <textarea class="textarea" id="type-input" placeholder="Type a message..." rows="3"></textarea>
+      <button class="btn btn-primary btn-block mt-4" onclick="sendTyped()">
+        Speak this
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
       </button>
     </div>
   </div>
 
-  <!-- PICTOGRAM MODE -->
-  <div id="section-picto" style="display:none">
-
-    <div id="selected-bar"
-      style="background:var(--light);border:1.5px solid var(--border);
-      border-radius:var(--radius);padding:12px 14px;min-height:52px;
-      display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">
-      <span id="selected-empty" style="color:var(--muted);font-size:13px">
-        Tap pictograms to build a sentence
-      </span>
+  <!-- Pictograms mode -->
+  <div class="mode-panel hidden" id="mode-picto">
+    <div class="tabs" style="margin-bottom:14px">
+      <div class="tab active" data-cat="basic" onclick="setCat('basic',this)">Basic</div>
+      <div class="tab" data-cat="feelings" onclick="setCat('feelings',this)">Feelings</div>
+      <div class="tab" data-cat="food" onclick="setCat('food',this)">Food</div>
+      <div class="tab" data-cat="body" onclick="setCat('body',this)">Body</div>
     </div>
-
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="btn-primary" id="speak-btn"
-        style="flex:2" onclick="speakPictogram()">
-        Speak →
-      </button>
-      <button class="btn-secondary"
-        style="flex:1" onclick="clearPictogram()">
-        Clear
-      </button>
-    </div>
-
-    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="cat-btn active" onclick="showCategory('basic',this)">Basic</button>
-      <button class="cat-btn" onclick="showCategory('feelings',this)">Feelings</button>
-      <button class="cat-btn" onclick="showCategory('food',this)">Food</button>
-      <button class="cat-btn" onclick="showCategory('body',this)">Body</button>
-      <button class="cat-btn" onclick="showCategory('actions',this)">Actions</button>
-    </div>
-
     <div class="picto-grid" id="picto-grid"></div>
-  </div>
-
-  <!-- History -->
-  <div style="margin-top:24px">
-    <h3>Recent phrases</h3>
-    <div id="history-list">
-      <p style="color:var(--muted);font-size:13px">No recent phrases yet</p>
+    <div class="row" style="gap:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="clearSentence()">Clear</button>
+      <button class="btn btn-primary" style="flex:2" onclick="speakSentence()">
+        Speak
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
     </div>
   </div>
+
+  <!-- Replay -->
+  <div class="row mt-6" style="gap:8px">
+    <button class="btn btn-secondary" style="flex:1" onclick="replayLast()">🔄 Replay last</button>
+    <button class="btn btn-secondary" style="flex:1" onclick="location.href='history.html'" id="history-btn">History (0)</button>
+  </div>
+
+</div>
 
 <script src="js/app.js"></script>
-<script src="js/communicate.js"></script>
+<script>
+const PICTOS = {
+  basic:    [{e:'✅',l:'Yes'},{e:'❌',l:'No'},{e:'🆘',l:'Help'},{e:'🙏',l:'Please'},{e:'🙌',l:'Thank you'},{e:'⏳',l:'Wait'},{e:'👍',l:'Good'},{e:'👎',l:'Bad'},{e:'🔄',l:'Again'}],
+  feelings: [{e:'😊',l:'Happy'},{e:'😢',l:'Sad'},{e:'😤',l:'Angry'},{e:'😴',l:'Tired'},{e:'🤕',l:'Pain'},{e:'🥰',l:'Love'},{e:'😌',l:'Calm'},{e:'😰',l:'Worried'},{e:'🤔',l:'Confused'}],
+  food:     [{e:'🍽️',l:'Eat'},{e:'💧',l:'Water'},{e:'☕',l:'Coffee'},{e:'🥤',l:'Drink'},{e:'🍞',l:'Bread'},{e:'🍎',l:'Fruit'},{e:'🍲',l:'Soup'},{e:'🧃',l:'Juice'},{e:'🍌',l:'Banana'}],
+  body:     [{e:'💊',l:'Medicine'},{e:'🚽',l:'Toilet'},{e:'🛁',l:'Bath'},{e:'🤢',l:'Nausea'},{e:'🤒',l:'Fever'},{e:'🩺',l:'Doctor'},{e:'👕',l:'Clothes'},{e:'🌡️',l:'Temp'},{e:'💉',l:'Injection'}]
+};
+
+let currentEmotion = 'neutral';
+let currentMode = 'voice';
+let sentence = [];
+let lastSpoken = '';
+let recognition = null;
+let isRecording = false;
+
+// ─── Emotion selection ──────────────────────────────────────
+function selectEmotion(emo, el) {
+  currentEmotion = emo;
+  document.querySelectorAll('.emo-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  const label = el.querySelector('.emo-label').textContent;
+  document.getElementById('emo-current').textContent = label;
+}
+
+// ─── Mode switching ─────────────────────────────────────────
+function setMode(m) {
+  currentMode = m;
+  document.querySelectorAll('.tab[data-mode]').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+  document.querySelectorAll('.mode-panel').forEach(p => p.classList.add('hidden'));
+  document.getElementById('mode-' + m).classList.remove('hidden');
+  document.getElementById('sentence-bar').classList.toggle('hidden', m !== 'picto');
+}
+
+// ─── Pictograms ─────────────────────────────────────────────
+function setCat(cat, el) {
+  document.querySelectorAll('.tab[data-cat]').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadPictos(cat);
+}
+
+function loadPictos(cat) {
+  const grid = document.getElementById('picto-grid');
+  grid.innerHTML = '';
+  PICTOS[cat].forEach(p => {
+    const btn = document.createElement('div');
+    btn.className = 'picto';
+    btn.innerHTML = `<div class="picto-emoji">${p.e}</div><div class="picto-label">${p.l}</div>`;
+    btn.onclick = () => addToSentence(p);
+    grid.appendChild(btn);
+  });
+}
+
+function addToSentence(p) {
+  sentence.push(p);
+  updateSentenceBar();
+}
+
+function updateSentenceBar() {
+  const bar = document.getElementById('sentence-bar');
+  bar.innerHTML = '';
+  if (!sentence.length) {
+    bar.innerHTML = '<span class="text-soft text-sm">Tap pictograms to build a sentence</span>';
+    return;
+  }
+  sentence.forEach((p, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = `${p.e} ${p.l} <span class="x">✕</span>`;
+    chip.onclick = () => { sentence.splice(i, 1); updateSentenceBar(); };
+    bar.appendChild(chip);
+  });
+}
+
+function clearSentence() {
+  sentence = [];
+  updateSentenceBar();
+}
+
+async function speakSentence() {
+  if (!sentence.length) return;
+  const text = sentence.map(p => p.l).join(', ');
+  await speakAndShow(text);
+  sentence = [];
+  updateSentenceBar();
+}
+
+// ─── Type mode ──────────────────────────────────────────────
+async function sendTyped() {
+  const input = document.getElementById('type-input');
+  const text = input.value.trim();
+  if (!text) return;
+  await speakAndShow(text);
+  input.value = '';
+}
+
+// ─── Voice mode ─────────────────────────────────────────────
+function toggleMic() {
+  if (isRecording) stopRecording();
+  else startRecording();
+}
+
+function startRecording() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    setMicStatus('❌ Voice recognition not supported in this browser. Try Chrome.', true);
+    return;
+  }
+
+  const profile = getProfile();
+  recognition = new SR();
+  recognition.lang = profile.language === 'en' ? 'en-US'
+                  : profile.language === 'fr' ? 'fr-FR'
+                  : 'es-ES';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+
+  recognition.onstart = () => {
+    isRecording = true;
+    const btn = document.getElementById('mic-btn');
+    btn.classList.add('recording');
+    btn.textContent = '⏹';
+    setMicStatus('Listening...');
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) final += t;
+      else interim += t;
+    }
+    if (interim) setOutput(interim, true);
+    if (final) speakAndShow(final);
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech') setMicStatus('No speech heard. Try again.', true);
+    else if (e.error === 'not-allowed') setMicStatus('❌ Microphone permission denied.', true);
+    else if (e.error === 'network') setMicStatus('❌ Network error. Check connection.', true);
+    else setMicStatus(`Error: ${e.error}`, true);
+    stopRecording();
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    const btn = document.getElementById('mic-btn');
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    setMicStatus('Tap to speak');
+  };
+
+  try { recognition.start(); }
+  catch (e) { setMicStatus('Could not start: ' + e.message, true); }
+}
+
+function stopRecording() {
+  if (recognition) recognition.stop();
+}
+
+function setMicStatus(msg, err) {
+  const el = document.getElementById('mic-status');
+  el.textContent = msg;
+  el.style.color = err ? '#fca5a5' : 'var(--soft)';
+}
+
+// ─── Speak pipeline ─────────────────────────────────────────
+async function speakAndShow(text) {
+  setOutput(text);
+  lastSpoken = text;
+  const result = await rewriteAndSpeak(text, currentEmotion);
+  if (result && result !== text) {
+    setOutput(result);
+    lastSpoken = result;
+  }
+  updateHistoryBtn();
+}
+
+async function replayLast() {
+  if (!lastSpoken) {
+    setOutput('Nothing to replay yet', false, true);
+    return;
+  }
+  await speakText(lastSpoken, currentEmotion);
+}
+
+function setOutput(text, interim, muted) {
+  const out = document.getElementById('output');
+  out.textContent = text || 'Choose a mode and start speaking...';
+  out.classList.toggle('muted', !!muted || !text);
+  if (interim) out.style.opacity = '.7';
+  else out.style.opacity = '1';
+}
+
+function updateHistoryBtn() {
+  const count = getHistory().length;
+  document.getElementById('history-btn').textContent = `History (${count})`;
+}
+
+// ─── Init ───────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  // Auth gate
+  try {
+    const consent = JSON.parse(localStorage.getItem('vela_consent') || '{}');
+    if (!consent.accepted) { location.href = 'index.html'; return; }
+  } catch { location.href = 'index.html'; return; }
+
+  loadPictos('basic');
+  updateHistoryBtn();
+
+  // Apply stage-based UI adjustments
+  const p = getProfile();
+  if (p.stage >= 3) {
+    document.querySelectorAll('.picto-emoji').forEach(el => el.style.fontSize = '44px');
+    document.querySelectorAll('.picto').forEach(el => el.style.padding = '16px');
+  }
+});
+</script>
 </body>
 </html>

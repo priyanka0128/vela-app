@@ -1,272 +1,254 @@
-const API = '';
+/* ═══════════════════════════════════════════════════════════
+   VELA — Core utilities
+   Profile management, voice cloning, TTS, carer registry, nav
+   ═══════════════════════════════════════════════════════════ */
 
-function saveProfile(data) {
-  localStorage.setItem('vela_profile', JSON.stringify(data));
-}
+// ─── Profile management ─────────────────────────────────────
 function getProfile() {
-  return JSON.parse(localStorage.getItem('vela_profile') || '{}');
-}
-function saveHistory(text) {
-  const h = getHistory();
-  h.unshift({ text, time: Date.now() });
-  if (h.length > 20) h.pop();
-  localStorage.setItem('vela_history', JSON.stringify(h));
-}
-function getHistory() {
-  return JSON.parse(localStorage.getItem('vela_history') || '[]');
-}
-
-// ── Browser speech fallback ──────────────────────────
-function speakWithBrowser(text) {
-  return new Promise((resolve) => {
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    const profile = getProfile();
-    utter.lang  = profile.lang || 'en-IE';
-    utter.rate  = 0.92;
-    utter.pitch = 1.0;
-    const voices = window.speechSynthesis.getVoices();
-    const match  = voices.find(v =>
-      v.lang.startsWith((profile.lang || 'en').substring(0, 2))
-    );
-    if (match) utter.voice = match;
-    utter.onend  = resolve;
-    utter.onerror = resolve;
-    window.speechSynthesis.speak(utter);
-  });
-}
-
-// ── Speak with cloned voice via ElevenLabs ───────────
-async function speakText(text) {
-  const profile = getProfile();
-
-  if (profile.voiceId) {
-    try {
-      console.log('Using cloned voice:', profile.voiceId);
-
-      const response = await fetch('/api/speak-cloned', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
-          text,
-          voiceId: profile.voiceId
-        })
-      });
-
-      const contentType = response.headers.get('content-type') || '';
-
-      if (response.ok && contentType.includes('audio')) {
-        const blob  = await response.blob();
-        const url   = URL.createObjectURL(blob);
-        const audio = new Audio(url);
-        await audio.play();
-        console.log('Cloned voice played');
-        return;
-      }
-
-      const data = await response.json();
-      if (data.useBrowser) {
-        await speakWithBrowser(text);
-        return;
-      }
-
-    } catch (err) {
-      console.log('Cloned voice failed:', err.message);
-      await speakWithBrowser(text);
-    }
-  } else {
-    console.log('No voiceId — using browser speech');
-    await speakWithBrowser(text);
-  }
-}
-
-// ── Main function ────────────────────────────────────
-async function rewriteAndSpeak(inputText) {
-  const profile = getProfile();
-  const btn     = document.getElementById('speak-btn');
-  const output  = document.getElementById('output-text');
-
-  if (btn) {
-    btn.disabled    = true;
-    btn.textContent = 'Thinking...';
-  }
-
   try {
-    // Step 1: Rewrite with Groq
-    const rwRes = await fetch('/api/rewrite', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ text: inputText, profile })
-    });
-
-    const { result, error } = await rwRes.json();
-    if (error) throw new Error(error);
-
-    console.log('Rewritten:', result);
-    if (output) output.textContent = result;
-
-    // Step 2: Speak in cloned voice
-    if (btn) btn.textContent = 'Speaking...';
-    await speakText(result);
-
-    saveHistory(result);
-    return result;
-
-  } catch (err) {
-    console.error('Error:', err.message);
-    alert('Something went wrong: ' + err.message);
-  } finally {
-    if (btn) {
-      btn.disabled    = false;
-      btn.textContent = 'Speak';
-    }
-  }
+    return JSON.parse(localStorage.getItem('vela_profile') || '{}');
+  } catch { return {}; }
 }
 
-// ── Emotion playback ─────────────────────────────────
-function playEmotion(emotion) {
-  const profile = getProfile();
-
-  // Play recorded emotion audio if available
-  if (profile.emotions && profile.emotions[emotion]) {
-    const audio = new Audio(profile.emotions[emotion]);
-    audio.play();
-    return;
-  }
-
-  // Speak emotion text in cloned voice
-  const texts = {
-    laugh:       'Ha! That is really funny!',
-    cry:         'I am feeling very sad right now.',
-    sigh:        'I just need a moment please.',
-    frustration: 'I am feeling really frustrated.'
-  };
-  speakText(texts[emotion] || emotion);
+function saveProfile(p) {
+  localStorage.setItem('vela_profile', JSON.stringify(p));
 }
 
-// ── Apply settings on load ───────────────────────────
-(function applySettings() {
+function getUserId() {
   const p = getProfile();
-  if (p.highContrast) document.body.classList.add('hc');
-  if (p.largeText)    document.body.classList.add('large');
-  window.speechSynthesis.getVoices();
-})();
-
-// ── Per-user voice bank ───────────────────────────────
-function getUserVoiceKey() {
-  const p = getProfile();
-  return 'vela_voices_' + (p.id || 'default');
+  return p.userId || 'guest';
 }
 
+// ─── User voice bank (per-user, private) ────────────────────
 function getUserVoices() {
-  return JSON.parse(localStorage.getItem(getUserVoiceKey()) || '[]');
+  const uid = getUserId();
+  try {
+    return JSON.parse(localStorage.getItem(`vela_voices_${uid}`) || '[]');
+  } catch { return []; }
 }
 
 function saveUserVoices(voices) {
-  localStorage.setItem(getUserVoiceKey(), JSON.stringify(voices));
+  const uid = getUserId();
+  localStorage.setItem(`vela_voices_${uid}`, JSON.stringify(voices));
 }
 
-// Get ALL voices across ALL users (caregiver only)
-function getAllUsersVoices() {
-  const all = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key && key.startsWith('vela_voices_')) {
-      try {
-        const voices = JSON.parse(localStorage.getItem(key) || '[]');
-        const userId = key.replace('vela_voices_', '');
-        voices.forEach(v => all.push({ ...v, userId }));
-      } catch(e) {}
-    }
-  }
-  return all;
-}
-// ── Master voice registry for caregiver ──────────────
-function registerVoiceForCaregiver(voiceId, voiceName, patientName, patientId) {
-  const registry = JSON.parse(
-    localStorage.getItem('vela_carer_registry') || '[]'
-  );
-  // Remove old entry for this patient if exists
-  const filtered = registry.filter(r => r.patientId !== patientId);
-  filtered.push({
-    voiceId,
-    voiceName,
-    patientName,
-    patientId,
-    addedAt: Date.now()
-  });
-  localStorage.setItem('vela_carer_registry', JSON.stringify(filtered));
+function getActiveVoice() {
+  return getUserVoices().find(v => v.active) || null;
 }
 
+function setActiveVoice(voiceId) {
+  const voices = getUserVoices().map(v => ({ ...v, active: v.voiceId === voiceId }));
+  saveUserVoices(voices);
+}
+
+// ─── Caregiver registry (shared across users) ───────────────
 function getCarerRegistry() {
-  return JSON.parse(localStorage.getItem('vela_carer_registry') || '[]');
+  try {
+    return JSON.parse(localStorage.getItem('vela_carer_registry') || '[]');
+  } catch { return []; }
 }
 
-// ── Offline detection ─────────────────────────────────
-(function watchConnection() {
-  function showBanner(msg, color) {
-    let b = document.getElementById('offline-banner');
-    if (!b) {
-      b = document.createElement('div');
-      b.id = 'offline-banner';
-      b.style.cssText = `
-        position:fixed;top:0;left:0;right:0;
-        padding:10px;text-align:center;
-        font-size:13px;font-weight:500;z-index:9999;
-        transition:all .3s`;
-      document.body.appendChild(b);
-    }
-    b.textContent    = msg;
-    b.style.background = color;
-    b.style.color      = '#fff';
-    b.style.display    = 'block';
-  }
+function registerVoiceForCaregiver(voiceId, voiceName, patientName, patientId) {
+  const reg = getCarerRegistry();
+  const exists = reg.find(v => v.voiceId === voiceId);
+  if (exists) return;
+  reg.push({ voiceId, voiceName, patientName, patientId, createdAt: Date.now() });
+  localStorage.setItem('vela_carer_registry', JSON.stringify(reg));
+}
 
-  function hideBanner() {
-    const b = document.getElementById('offline-banner');
-    if (b) b.style.display = 'none';
-  }
+function removeVoiceFromCaregiver(voiceId) {
+  const reg = getCarerRegistry().filter(v => v.voiceId !== voiceId);
+  localStorage.setItem('vela_carer_registry', JSON.stringify(reg));
+}
 
-  window.addEventListener('offline', () => {
-    showBanner(
-      '⚠️ No internet — using browser voice. Cloned voice unavailable.',
-      '#d97706'
-    );
-  });
+// ─── History ─────────────────────────────────────────────────
+function saveHistory(text, emotion = 'neutral') {
+  const uid = getUserId();
+  const key = `vela_history_${uid}`;
+  try {
+    const arr = JSON.parse(localStorage.getItem(key) || '[]');
+    arr.unshift({ text, emotion, at: Date.now() });
+    localStorage.setItem(key, JSON.stringify(arr.slice(0, 200)));
+  } catch {}
+}
 
-  window.addEventListener('online', () => {
-    showBanner('✓ Back online — cloned voice restored', '#16a34a');
-    setTimeout(hideBanner, 3000);
-  });
+function getHistory() {
+  const uid = getUserId();
+  try {
+    return JSON.parse(localStorage.getItem(`vela_history_${uid}`) || '[]');
+  } catch { return []; }
+}
 
-  if (!navigator.onLine) {
-    showBanner(
-      '⚠️ Offline mode — browser voice active',
-      '#d97706'
-    );
-  }
-})();
+// ─── Core speech pipeline ────────────────────────────────────
+async function rewriteAndSpeak(text, emotion = 'neutral') {
+  if (!text || !text.trim()) return null;
 
-// ── Condition stage adaptation ────────────────────────
-(function applyStage() {
-  const p = getProfile();
-  if (!p.stage) return;
-  const stage = parseInt(p.stage);
+  const profile = getProfile();
+  let finalText = text;
 
-  // Stage 3+ — larger buttons
-  if (stage >= 3) {
-    document.querySelectorAll('.picto-btn, .eye-picto').forEach(el => {
-      el.style.minHeight = '90px';
+  // Step 1: Rewrite through personality engine
+  try {
+    const rwRes = await fetch('/api/rewrite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        text,
+        emotion,
+        region: profile.region || 'spain',
+        slang: profile.slang || 50,
+        humour: profile.humour || 50,
+        energy: profile.energy || 50,
+        language: profile.language || 'es'
+      })
     });
+    if (rwRes.ok) {
+      const data = await rwRes.json();
+      if (data.text) finalText = data.text;
+    }
+  } catch (e) {
+    console.warn('Rewrite failed, using original text', e);
   }
 
-  // Stage 4 — redirect to eye tracking automatically
-  if (stage === 4 &&
-      !window.location.href.includes('eyetrack') &&
-      !window.location.href.includes('home') &&
-      !window.location.href.includes('setup') &&
-      !window.location.href.includes('caregiver') &&
-      !window.location.href.includes('settings')) {
-    window.location.href = 'eyetrack.html';
+  // Step 2: Speak through cloned voice
+  await speakText(finalText, emotion);
+  saveHistory(finalText, emotion);
+  return finalText;
+}
+
+async function speakText(text, emotion = 'neutral') {
+  if (!text || !text.trim()) return;
+
+  const voice = getActiveVoice();
+
+  if (voice && voice.voiceId) {
+    try {
+      const res = await fetch('/api/speak-cloned', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, voiceId: voice.voiceId, emotion })
+      });
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const audio = new Audio(url);
+        await audio.play();
+        return;
+      }
+    } catch (e) {
+      console.warn('Cloned voice failed, falling back to browser TTS', e);
+    }
   }
+
+  // Fallback: browser speech synthesis
+  return browserTTS(text);
+}
+
+function browserTTS(text) {
+  return new Promise((resolve) => {
+    if (!('speechSynthesis' in window)) { resolve(); return; }
+    const profile = getProfile();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = profile.language === 'en' ? 'en-US'
+           : profile.language === 'fr' ? 'fr-FR'
+           : 'es-ES';
+    u.rate = 1;
+    u.onend = () => resolve();
+    u.onerror = () => resolve();
+    speechSynthesis.speak(u);
+  });
+}
+
+// ─── Floating "← vela" home link on every app page ───────────
+(function injectVelaHomeLink() {
+  const skipPages = ['landing.html', 'index.html', 'setup.html'];
+  const path = location.pathname.split('/').pop() || 'index.html';
+  if (skipPages.includes(path)) return;
+
+  function build() {
+    if (document.getElementById('vela-home-link')) return;
+    const link = document.createElement('a');
+    link.id = 'vela-home-link';
+    link.href = 'landing.html';
+    link.title = 'Back to Vela home';
+    link.innerHTML = `
+      <span style="
+        display:inline-flex;align-items:center;gap:6px;
+        background:#ffffff;color:#1a2e2a;
+        padding:8px 14px 8px 12px;border-radius:999px;
+        font-size:12px;font-weight:600;
+        font-family:Inter,-apple-system,sans-serif;
+        box-shadow:0 4px 14px rgba(26,46,42,.10);
+        border:1px solid #d1d3d1;
+        transition:transform .15s,box-shadow .15s;">
+        <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="height:14px;width:auto">
+          <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+          <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+            <path d="M 0 4 Q 12 14, 0 24"/>
+            <path d="M 8 4 Q 20 14, 8 24"/>
+            <path d="M 16 4 Q 28 14, 16 24"/>
+          </g>
+        </svg>
+        <span style="opacity:.6;font-size:11px;margin-left:2px">· home</span>
+      </span>`;
+    link.style.cssText = 'position:fixed;bottom:18px;left:18px;z-index:9997;text-decoration:none;display:block';
+    link.addEventListener('mouseenter', () => {
+      link.firstElementChild.style.transform = 'translateY(-2px)';
+    });
+    link.addEventListener('mouseleave', () => {
+      link.firstElementChild.style.transform = 'translateY(0)';
+    });
+    document.body.appendChild(link);
+  }
+
+  if (document.body) build();
+  else document.addEventListener('DOMContentLoaded', build);
 })();
+
+// ─── Offline detection banner ───────────────────────────────
+(function offlineBanner() {
+  function build() {
+    if (document.getElementById('offline-banner')) return;
+    const banner = document.createElement('div');
+    banner.id = 'offline-banner';
+    banner.style.cssText = `
+      position:fixed;top:0;left:0;right:0;z-index:9999;
+      background:#f59e0b;color:#1f2937;text-align:center;
+      padding:8px 16px;font-size:13px;font-weight:600;
+      font-family:Inter,sans-serif;display:none`;
+    document.body.appendChild(banner);
+
+    const update = () => {
+      if (!navigator.onLine) {
+        banner.textContent = '⚠️ You are offline. Vela works locally; voice cloning and AI rewrite need internet.';
+        banner.style.display = 'block';
+        banner.style.background = '#f59e0b';
+      } else if (banner.style.display === 'block') {
+        banner.textContent = '✓ Back online';
+        banner.style.background = '#22c55e';
+        setTimeout(() => banner.style.display = 'none', 3000);
+      }
+    };
+    window.addEventListener('online', update);
+    window.addEventListener('offline', update);
+    update();
+  }
+  if (document.body) build();
+  else document.addEventListener('DOMContentLoaded', build);
+})();
+
+// ─── Expose globally ────────────────────────────────────────
+window.getProfile = getProfile;
+window.saveProfile = saveProfile;
+window.getUserId = getUserId;
+window.getUserVoices = getUserVoices;
+window.saveUserVoices = saveUserVoices;
+window.getActiveVoice = getActiveVoice;
+window.setActiveVoice = setActiveVoice;
+window.getCarerRegistry = getCarerRegistry;
+window.registerVoiceForCaregiver = registerVoiceForCaregiver;
+window.removeVoiceFromCaregiver = removeVoiceFromCaregiver;
+window.saveHistory = saveHistory;
+window.getHistory = getHistory;
+window.rewriteAndSpeak = rewriteAndSpeak;
+window.speakText = speakText;
+window.browserTTS = browserTTS;

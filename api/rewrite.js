@@ -1,80 +1,89 @@
-export default async function handler(req, res) {
+// ═══════════════════════════════════════════════════════════
+// /api/rewrite — Groq personality engine + emotion framing
+// ═══════════════════════════════════════════════════════════
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+const REGION_PROMPTS = {
+  'spain':            'Madrid Spanish — neutral peninsular',
+  'spain-andalucia':  'Andalucian Spanish — warm, drops final s, casual',
+  'spain-catalonia':  'Catalan-influenced Spanish — slightly formal',
+  'mexico':           'Mexican Spanish — warm, friendly, uses "órale", "qué onda"',
+  'argentina':        'Rioplatense Spanish — voseo, "che", "boludo"',
+  'colombia':         'Colombian Spanish — polite, gentle, "parce", "chévere"',
+  'cuba':             'Cuban Spanish — energetic, "asere", "qué bolá"',
+  'uk':               'British English — dry, understated',
+  'ireland':          'Irish English — warm, lyrical, "grand", "deadly"',
+  'us':               'American English — direct, friendly',
+  'france':           'Parisian French — slightly formal',
+  'canada-fr':        'Québécois French — warm, informal'
+};
 
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const EMOTION_INSTRUCTIONS = {
+  neutral: '',
+  happy:   'Frame this message with warmth and positivity.',
+  sad:     'Frame this message with soft sadness and vulnerability.',
+  calm:    'Frame this message with slow, peaceful calm.',
+  urgent:  'Frame this message with urgency — keep it short and direct.',
+  gentle:  'Frame this message gently and softly.',
+  excited: 'Frame this message with high energy and excitement.',
+  tender:  'Frame this message tenderly, with love.'
+};
 
-  try {
-    const { text, profile } = req.body;
+export async function rewrite(req, res) {
+  const { text, emotion = 'neutral', region = 'spain', slang = 50, humour = 50, energy = 50, language = 'es' } = req.body || {};
+  if (!text) return res.status(400).json({ error: 'Missing text' });
+  if (!process.env.GROQ_API_KEY) return res.status(500).json({ error: 'GROQ_API_KEY not configured' });
 
-    if (!text) {
-      return res.status(400).json({ error: 'No text provided' });
-    }
+  const langName = language === 'en' ? 'English' : language === 'fr' ? 'French' : 'Spanish';
+  const regionDesc = REGION_PROMPTS[region] || REGION_PROMPTS['spain'];
+  const emotionLine = EMOTION_INSTRUCTIONS[emotion] || '';
 
-    console.log('KEY START:', process.env.GROQ_API_KEY?.substring(0, 8));
+  const slangLevel = slang > 70 ? 'heavy slang and informality' : slang > 40 ? 'casual everyday tone' : 'formal, polished tone';
+  const humourLevel = humour > 70 ? 'playful and witty' : humour > 40 ? 'lightly warm' : 'serious';
+  const energyLevel = energy > 70 ? 'lively and animated' : energy > 40 ? 'balanced' : 'calm and measured';
 
-    const prompt = `You are helping a person with ALS communicate naturally.
-They selected these pictograms: ${text}
-
-Their profile:
-Region: ${profile?.region || 'Ireland'}
-Language: ${profile?.lang || 'en'}
-Tone: ${profile?.tone || 'casual'}
-
-Convert the pictogram labels into ONE natural sentence that a real person would say.
-Examples:
-- "Eat, Water" → "I would like something to eat and some water please."
-- "Help, Pain" → "I need help, I am in pain."
-- "Happy, Love" → "I am feeling happy, I love you."
-- "Medicine, Doctor" → "I need my medicine and I want to see the doctor."
-- "Tired, Sleep" → "I am very tired, I need to sleep."
+  const systemPrompt = `You are rewriting messages for an ALS patient using their assistive communication device.
+The patient speaks ${langName} with this style: ${regionDesc}.
+Tone: ${slangLevel}, ${humourLevel}, ${energyLevel}.
+${emotionLine}
 
 Rules:
-- Write in the person's language (${profile?.lang || 'en'})
-- Sound warm and natural like a real person speaking
-- One sentence only
-- No slang endings like tío, venga, man, dude
-- Return ONLY the sentence, nothing else`;
+- Keep the message SHORT — at most 15 words.
+- Keep the original MEANING intact.
+- Make it sound like a real person from that region, not a translation.
+- Return ONLY the rewritten message in ${langName}. No quotes, no explanation, no preamble.`;
 
-    const response = await fetch(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 150,
-          temperature: 0.7
-        })
-      }
-    );
+  try {
+    const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: text }
+        ],
+        temperature: 0.7,
+        max_tokens: 100
+      })
+    });
 
-    const data = await response.json();
-    console.log('GROQ RESPONSE:', JSON.stringify(data).substring(0, 200));
-
-    if (!data.choices || !data.choices[0]) {
-      throw new Error('Groq returned no response. Check your API key.');
+    if (!r.ok) {
+      const errText = await r.text();
+      return res.status(r.status).json({ error: 'Groq error: ' + errText });
     }
-
-    const result = data.choices[0].message.content.trim();
-    res.status(200).json({ result });
-
-  } catch (err) {
-    console.error('Rewrite error:', err.message);
-    res.status(500).json({ error: err.message });
+    const data = await r.json();
+    const out = data.choices?.[0]?.message?.content?.trim() || text;
+    return res.status(200).json({ text: out });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
+}
+
+// Vercel handler
+export default function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  return rewrite(req, res);
 }

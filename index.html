@@ -1,101 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Vela — Your Voice, Always</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Welcome — Vela</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page">
 
-  <div style="text-align:center;padding:32px 0 24px">
-<div style="text-align:center;padding:32px 0 24px">
-  <img src="assets/logo.png"
-    alt="Vela"
-    style="width:120px;height:auto;margin-bottom:12px;border-radius:8px">
-  <p style="font-size:16px;color:var(--muted);margin:0">
-    Your voice, preserved forever
+<div class="page" style="max-width:540px;padding-top:60px">
+
+  <div style="text-align:center;margin-bottom:32px">
+    <span class="vela-logo" style="display:inline-block;height:42px;color:var(--ink)">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="height:100%">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </span>
+  </div>
+
+  <div class="card card-lg" style="text-align:center">
+    <div class="badge badge-lime" style="margin-bottom:18px">Welcome</div>
+    <h1 style="font-size:30px;margin-bottom:12px;line-height:1.1">ALS takes voices.<br><span style="color:var(--lime)">Vela keeps them.</span></h1>
+    <p style="color:var(--soft);font-size:15px;margin-bottom:24px">
+      Before you start, a quick privacy notice. Vela stores your voice samples and profile <strong>locally on this device</strong>. Voice cloning sends your audio to ElevenLabs (an EU-compliant AI provider). Messages are rewritten by Groq AI in transit only — never stored.
+    </p>
+
+    <div style="background:rgba(0,0,0,.25);border:1px solid var(--glass-br);border-radius:var(--radius);padding:16px;margin-bottom:24px;text-align:left;font-size:13px;color:var(--soft);line-height:1.6">
+      <div style="font-weight:600;color:var(--white);margin-bottom:8px">By continuing you agree that:</div>
+      Your voice recordings are sent to ElevenLabs for cloning · Text is sent to Groq for personality rewriting · Your data stays on this device unless you explicitly export it · You can delete everything at any time in Settings.
+    </div>
+
+    <button class="btn btn-primary btn-lg btn-block" onclick="acceptAndContinue()">
+      I agree — continue to setup
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+
+    <a href="landing.html" class="btn btn-ghost btn-block" style="margin-top:10px">
+      Back to homepage
+    </a>
+  </div>
+
+  <p style="text-align:center;color:var(--softer);font-size:12px;margin-top:24px">
+    GDPR-compliant · No tracking · No ads
   </p>
-</div>   
-  </div>
-
-  <div class="card">
-    <h2>Before we begin</h2>
-    <p style="font-size:14px">Vela needs your permission to work. Please read and agree to each item below.</p>
-
-    <div class="check-row" onclick="toggle('c1')">
-      <input type="checkbox" id="c1">
-      <div class="check-row-text">
-        <strong>Voice recording & cloning</strong><br>
-        <span style="color:var(--muted);font-size:13px">We record your voice to create a personal AI clone that speaks for you</span>
-      </div>
-    </div>
-    <div class="check-row" onclick="toggle('c2')">
-      <input type="checkbox" id="c2">
-      <div class="check-row-text">
-        <strong>AI-powered communication</strong><br>
-        <span style="color:var(--muted);font-size:13px">AI rewrites your messages in your personal style and dialect</span>
-      </div>
-    </div>
-    <div class="check-row" onclick="toggle('c3')">
-      <input type="checkbox" id="c3">
-      <div class="check-row-text">
-        <strong>Local data storage</strong><br>
-        <span style="color:var(--muted);font-size:13px">Your profile and voice are stored securely on this device</span>
-      </div>
-    </div>
-    <div class="check-row" onclick="toggle('c4')">
-      <input type="checkbox" id="c4">
-      <div class="check-row-text">
-        <strong>Camera & microphone access</strong><br>
-        <span style="color:var(--muted);font-size:13px">Used for eye tracking and voice recording only</span>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
-    <label>I am a</label>
-    <select id="role">
-      <option value="patient">Patient</option>
-      <option value="caregiver">Caregiver / Family member</option>
-    </select>
-  </div>
-
-  <button class="btn-primary" onclick="startSetup()">
-    Get started →
-  </button>
-
-  <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:16px">
-    Your data never leaves your device without permission
-  </p>
-
 </div>
 
-<script src="js/app.js"></script>
 <script>
-function toggle(id) {
-  const el = document.getElementById(id);
-  el.checked = !el.checked;
-}
-
-function startSetup() {
-  const all = ['c1','c2','c3','c4'].every(id =>
-    document.getElementById(id).checked
-  );
-  if (!all) {
-    alert('Please agree to all permissions to continue.');
-    return;
+  function acceptAndContinue() {
+    localStorage.setItem('vela_consent', JSON.stringify({ accepted: true, at: Date.now() }));
+    // Returning user with profile goes to home, new user goes to setup
+    try {
+      const profile = JSON.parse(localStorage.getItem('vela_profile') || '{}');
+      if (profile.name && profile.region) {
+        location.href = 'home.html';
+        return;
+      }
+    } catch {}
+    location.href = 'setup.html';
   }
-  const p = getProfile();
-  saveProfile({
-    ...p,
-    id:      p.id || Date.now().toString(),
-    role:    document.getElementById('role').value,
-    consent: true
-  });
-  window.location.href = 'setup.html';
-}
 </script>
 </body>
 </html>

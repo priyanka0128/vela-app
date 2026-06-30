@@ -1,60 +1,76 @@
-export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  if (req.method === 'OPTIONS') return res.status(200).end();
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+// ═══════════════════════════════════════════════════════════
+// /api/speak-cloned — ElevenLabs TTS with emotion modulation
+// 8 emotions: neutral, happy, sad, calm, urgent, gentle, excited, tender
+// ═══════════════════════════════════════════════════════════
 
-  try {
-    if (typeof req.body === 'string') req.body = JSON.parse(req.body);
-    const { text, voiceId } = req.body;
+const EMOTION_SETTINGS = {
+  neutral: { stability: 0.5,  similarity_boost: 0.75, style: 0.0,  use_speaker_boost: true },
+  happy:   { stability: 0.15, similarity_boost: 0.7,  style: 0.95, use_speaker_boost: true },
+  sad:     { stability: 0.9,  similarity_boost: 0.9,  style: 0.0,  use_speaker_boost: true },
+  calm:    { stability: 0.95, similarity_boost: 0.9,  style: 0.0,  use_speaker_boost: true },
+  urgent:  { stability: 0.1,  similarity_boost: 0.65, style: 1.0,  use_speaker_boost: true },
+  gentle:  { stability: 0.8,  similarity_boost: 0.95, style: 0.1,  use_speaker_boost: true },
+  excited: { stability: 0.05, similarity_boost: 0.65, style: 1.0,  use_speaker_boost: true },
+  tender:  { stability: 0.75, similarity_boost: 0.95, style: 0.15, use_speaker_boost: true }
+};
 
-    if (!text) return res.status(400).json({ error: 'No text provided' });
+const AUDIO_TAGS = {
+  happy:   '[cheerfully]',
+  sad:     '[sadly, softly]',
+  calm:    '[calmly, slowly]',
+  urgent:  '[urgently, loudly]',
+  gentle:  '[gently, warmly]',
+  excited: '[excitedly]',
+  tender:  '[tenderly, softly]'
+};
 
-    if (!voiceId) {
-      console.log('No voiceId — using browser speech');
-      return res.status(200).json({ useBrowser: true });
-    }
+export async function speakCloned(req, res) {
+  const { text, voiceId, emotion = 'neutral' } = req.body || {};
+  if (!text || !voiceId) return res.status(400).json({ error: 'Missing text or voiceId' });
+  if (!process.env.ELEVENLABS_API_KEY) return res.status(500).json({ error: 'ELEVENLABS_API_KEY not configured' });
 
-    console.log('Speaking with ElevenLabs voice:', voiceId);
-    console.log('Text:', text.substring(0, 80));
+  const voice_settings = EMOTION_SETTINGS[emotion] || EMOTION_SETTINGS.neutral;
+  const tag = AUDIO_TAGS[emotion] || '';
+  const finalText = tag ? `${tag} ${text}` : text;
 
-    const response = await fetch(
-      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
+  // Try v3 first (best emotional range), fall back to multilingual_v2
+  const models = ['eleven_v3', 'eleven_multilingual_v2'];
+  let lastError = null;
+
+  for (const model_id of models) {
+    try {
+      const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': process.env.ELEVENLABS_API_KEY
+          'Accept': 'audio/mpeg',
+          'xi-api-key': process.env.ELEVENLABS_API_KEY,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          text,
-          model_id: 'eleven_multilingual_v2',
-          voice_settings: {
-            stability:         0.5,
-            similarity_boost:  0.85,
-            style:             0.2,
-            use_speaker_boost: true
-          }
+          text: model_id === 'eleven_v3' ? finalText : text,
+          model_id,
+          voice_settings
         })
+      });
+
+      if (!r.ok) {
+        lastError = await r.text();
+        continue;
       }
-    );
 
-    console.log('ElevenLabs TTS status:', response.status);
-
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error('ElevenLabs TTS error:', JSON.stringify(errData));
-      return res.status(200).json({ useBrowser: true });
+      const buffer = Buffer.from(await r.arrayBuffer());
+      res.setHeader('Content-Type', 'audio/mpeg');
+      res.setHeader('Content-Length', buffer.length);
+      return res.status(200).send(buffer);
+    } catch (e) {
+      lastError = e.message;
     }
-
-    const audioBuffer = await response.arrayBuffer();
-    res.setHeader('Content-Type', 'audio/mpeg');
-    res.setHeader('Content-Length', audioBuffer.byteLength);
-    res.send(Buffer.from(audioBuffer));
-
-  } catch (err) {
-    console.error('Speak-cloned error:', err.message);
-    res.status(200).json({ useBrowser: true });
   }
+
+  return res.status(500).json({ error: 'TTS failed: ' + lastError });
+}
+
+export default function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  return speakCloned(req, res);
 }

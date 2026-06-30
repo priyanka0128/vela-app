@@ -1,165 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Setup — Vela</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Setup — Vela</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page">
 
-  <!-- Progress bar -->
-  <div class="progress-bar">
-    <div class="p-dot active" id="d1"></div>
-    <div class="p-dot" id="d2"></div>
-    <div class="p-dot" id="d3"></div>
-    <div class="p-dot" id="d4"></div>
-    <div class="p-dot" id="d5"></div>
-    <div class="p-dot" id="d6"></div>
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title">Setting up your profile</span>
+    <span style="font-size:12px;color:var(--soft);font-weight:600" id="step-indicator">Step 1 of 4</span>
   </div>
+</nav>
 
-  <!-- STEP 1: Profile -->
-  <div id="s1">
-    <h1>About you</h1>
-    <p>This helps us personalise your communication style.</p>
-    <div class="card">
-      <label>Your name</label>
-      <input type="text" id="name" placeholder="First name">
-      <label>Age</label>
-      <input type="number" id="age" placeholder="e.g. 45" min="1" max="120">
-      <label>Language</label>
-      <select id="lang">
-        <option value="es-ES">Spanish (Spain)</option>
-        <option value="es-MX">Spanish (Mexico)</option>
-        <option value="en-IE">English (Ireland)</option>
-        <option value="en-GB">English (UK)</option>
-        <option value="en-US">English (USA)</option>
-        <option value="fr-FR">French</option>
-      </select>
-      <label>Region / Country</label>
-      <select id="region">
-        <option value="Spain">Spain</option>
-        <option value="Mexico">Mexico</option>
-        <option value="Ireland">Ireland</option>
-        <option value="UK">UK</option>
-        <option value="USA">USA</option>
-        <option value="France">France</option>
-      </select>
-      <label>Caregiver name (optional)</label>
-      <input type="text" id="carer" placeholder="Leave blank if none">
-    </div>
-    <button class="btn-primary" onclick="next1()">Continue</button>
-  </div>
+<div class="page" style="max-width:560px">
 
-  <!-- STEP 2: Capabilities -->
-  <div id="s2" style="display:none">
-    <h1>How can you communicate?</h1>
-    <p>Select everything that applies right now.</p>
-    <div class="card">
-      <label><input type="checkbox" name="cap" value="speak">&nbsp; I can speak</label><br><br>
-      <label><input type="checkbox" name="cap" value="type">&nbsp; I can type</label><br><br>
-      <label><input type="checkbox" name="cap" value="eye">&nbsp; I can control with my eyes</label><br><br>
-      <label><input type="checkbox" name="cap" value="touch">&nbsp; I can tap / touch a screen</label>
-    </div>
-    <button class="btn-primary" onclick="next2()">Continue</button>
-  </div>
+  <!-- Step 1: Name + language -->
+  <div class="step" id="step-1">
+    <div class="badge badge-lime mb-2">Step 1 · About you</div>
+    <h1>What should Vela call you?</h1>
+    <p class="page-subtitle">This is the patient's name — the person whose voice will be preserved.</p>
 
-  <!-- STEP 3: Personality -->
-  <div id="s3" style="display:none">
-    <h1>Your personality</h1>
-    <p>This shapes how Vela speaks for you.</p>
     <div class="card">
-      <label>Tone</label>
-      <select id="tone">
-        <option value="casual">Casual</option>
-        <option value="formal">Formal</option>
-      </select>
-      <label>Humour level</label>
-      <select id="humour">
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
-      </select>
-      <label>Slang usage</label>
-      <select id="slang">
-        <option value="none">None</option>
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
-      </select>
-      <label>Energy level</label>
-      <select id="energy">
-        <option value="low">Low</option>
-        <option value="medium" selected>Medium</option>
-        <option value="high">High</option>
-      </select>
-    </div>
-    <button class="btn-primary" onclick="next3()">Continue</button>
-  </div>
-
-  <!-- STEP 4: Voice setup -->
-  <div id="s4" style="display:none">
-    <h1>Your voice</h1>
-    <p>Record a short voice sample so Vela can learn your voice. Speak naturally for about 30 seconds.</p>
-    <div class="card">
-      <div id="record-status" style="text-align:center;padding:20px;color:#888;font-size:15px">
-        Press record and speak naturally
+      <div class="field">
+        <label class="label">Name</label>
+        <input class="input" id="f-name" type="text" placeholder="Maria García" autocomplete="off">
       </div>
-      <div style="display:flex;gap:10px;margin-top:10px">
-        <button class="btn-primary" id="record-btn" onclick="startRecording()">
-          Start Recording
-        </button>
-        <button class="btn-secondary" onclick="skipVoice()">
-          Skip for now
-        </button>
+      <div class="field">
+        <label class="label">Primary language</label>
+        <select class="select" id="f-language">
+          <option value="es">Spanish</option>
+          <option value="en">English</option>
+          <option value="fr">French</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="next(1)">Continue</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Region -->
+  <div class="step hidden" id="step-2">
+    <div class="badge badge-lime mb-2">Step 2 · Region</div>
+    <h1>Where are you from?</h1>
+    <p class="page-subtitle">Vela's AI rewrites your messages to sound like your region — not a generic accent.</p>
+
+    <div class="card">
+      <div class="field">
+        <label class="label">Region / dialect</label>
+        <select class="select" id="f-region">
+          <optgroup label="Spanish">
+            <option value="spain">Spain — Madrid</option>
+            <option value="spain-andalucia">Spain — Andalucía</option>
+            <option value="spain-catalonia">Spain — Catalonia</option>
+            <option value="mexico">Mexico</option>
+            <option value="argentina">Argentina</option>
+            <option value="colombia">Colombia</option>
+            <option value="cuba">Cuba</option>
+          </optgroup>
+          <optgroup label="English">
+            <option value="uk">United Kingdom</option>
+            <option value="ireland">Ireland</option>
+            <option value="us">United States</option>
+          </optgroup>
+          <optgroup label="French">
+            <option value="france">France</option>
+            <option value="canada-fr">Canada (Québec)</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="row" style="gap:8px">
+        <button class="btn btn-secondary" style="flex:1" onclick="back(2)">Back</button>
+        <button class="btn btn-primary" style="flex:2" onclick="next(2)">Continue</button>
       </div>
     </div>
-    <div id="recording-preview" style="display:none" class="card">
-      <p>Recording saved. You can re-record or continue.</p>
-      <button class="btn-primary" onclick="next4()">Continue</button>
-    </div>
   </div>
 
-  <!-- STEP 5: Emotional sounds -->
-  <div id="s5" style="display:none">
-    <h1>Emotional sounds</h1>
-    <p>Record these sounds so Vela can express your real emotions. Tap each button and make the sound.</p>
+  <!-- Step 3: Personality -->
+  <div class="step hidden" id="step-3">
+    <div class="badge badge-lime mb-2">Step 3 · Personality</div>
+    <h1>How do you speak?</h1>
+    <p class="page-subtitle">Slide each to match the patient's natural style. Vela uses these to rewrite messages so they sound authentic.</p>
+
     <div class="card">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <button class="emotion-record-btn" id="btn-laugh" onclick="recordEmotion('laugh', this)">
-          😄 Record Laugh
-        </button>
-        <button class="emotion-record-btn" id="btn-cry" onclick="recordEmotion('cry', this)">
-          😢 Record Cry
-        </button>
-        <button class="emotion-record-btn" id="btn-sigh" onclick="recordEmotion('sigh', this)">
-          😮‍💨 Record Sigh
-        </button>
-        <button class="emotion-record-btn" id="btn-frustration" onclick="recordEmotion('frustration', this)">
-          😤 Record Frustration
-        </button>
+      <div class="field">
+        <label class="label">Slang & informality <span id="slang-val" class="text-lime" style="float:right">50</span></label>
+        <input type="range" class="range" id="f-slang" min="0" max="100" value="50" oninput="document.getElementById('slang-val').textContent=this.value">
+        <div class="row-between text-xs text-softer" style="margin-top:6px">
+          <span>Formal</span><span>Casual</span><span>Heavy slang</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Humour <span id="humour-val" class="text-lime" style="float:right">50</span></label>
+        <input type="range" class="range" id="f-humour" min="0" max="100" value="50" oninput="document.getElementById('humour-val').textContent=this.value">
+        <div class="row-between text-xs text-softer" style="margin-top:6px">
+          <span>Serious</span><span>Mixed</span><span>Very playful</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Energy <span id="energy-val" class="text-lime" style="float:right">50</span></label>
+        <input type="range" class="range" id="f-energy" min="0" max="100" value="50" oninput="document.getElementById('energy-val').textContent=this.value">
+        <div class="row-between text-xs text-softer" style="margin-top:6px">
+          <span>Calm</span><span>Balanced</span><span>Lively</span>
+        </div>
+      </div>
+
+      <div class="row" style="gap:8px;margin-top:16px">
+        <button class="btn btn-secondary" style="flex:1" onclick="back(3)">Back</button>
+        <button class="btn btn-primary" style="flex:2" onclick="next(3)">Continue</button>
       </div>
     </div>
-    <button class="btn-primary" onclick="next5()">Continue</button>
-    <br><br>
-    <button class="btn-secondary" onclick="next5()">Skip emotions</button>
   </div>
 
-  <!-- STEP 6: All done -->
-  <div id="s6" style="display:none">
-    <h1>You are all set!</h1>
-    <p>Vela is ready to communicate for you.</p>
-    <div class="card" id="profile-summary">
+  <!-- Step 4: Stage -->
+  <div class="step hidden" id="step-4">
+    <div class="badge badge-lime mb-2">Step 4 · Progression stage</div>
+    <h1>What stage is the disease at?</h1>
+    <p class="page-subtitle">Vela adapts the interface — larger buttons, simpler flows, eye-only mode — as the disease progresses.</p>
+
+    <div class="card">
+      <div class="stack" id="stage-options">
+        <label class="stage-opt" data-stage="1">
+          <input type="radio" name="stage" value="1" checked>
+          <div>
+            <div style="font-weight:600;font-size:15px">Stage 1 · Early</div>
+            <div class="text-sm text-soft">Can speak, type, and move freely. Voice may show subtle changes.</div>
+          </div>
+        </label>
+        <label class="stage-opt" data-stage="2">
+          <input type="radio" name="stage" value="2">
+          <div>
+            <div style="font-weight:600;font-size:15px">Stage 2 · Mild difficulty</div>
+            <div class="text-sm text-soft">Speech is slower or less clear. Typing still works well.</div>
+          </div>
+        </label>
+        <label class="stage-opt" data-stage="3">
+          <input type="radio" name="stage" value="3">
+          <div>
+            <div style="font-weight:600;font-size:15px">Stage 3 · Significant difficulty</div>
+            <div class="text-sm text-soft">Speaking is very hard. Touch input limited. Pictograms preferred.</div>
+          </div>
+        </label>
+        <label class="stage-opt" data-stage="4">
+          <input type="radio" name="stage" value="4">
+          <div>
+            <div style="font-weight:600;font-size:15px">Stage 4 · Eye-only</div>
+            <div class="text-sm text-soft">Communication primarily through eye tracking.</div>
+          </div>
+        </label>
+      </div>
+
+      <div class="row" style="gap:8px;margin-top:18px">
+        <button class="btn btn-secondary" style="flex:1" onclick="back(4)">Back</button>
+        <button class="btn btn-primary" style="flex:2" onclick="finish()">Finish setup</button>
+      </div>
     </div>
-    <button class="btn-primary" onclick="window.location.href='communicate.html'">
-      Start Communicating
-    </button>
   </div>
 
 </div>
 
+<style>
+  .stage-opt {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--glass);
+    border: 1.5px solid var(--glass-br);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .stage-opt:hover { background: rgba(255,255,255,.12); }
+  .stage-opt input { margin-top: 4px; accent-color: var(--lime); }
+  .stage-opt:has(input:checked) {
+    border-color: var(--lime);
+    background: rgba(212,255,77,.08);
+  }
+</style>
+
 <script src="js/app.js"></script>
-<script src="js/setup.js"></script>
+<script>
+let currentStep = 1;
+const TOTAL = 4;
+
+function setStep(n) {
+  document.querySelectorAll('.step').forEach(s => s.classList.add('hidden'));
+  document.getElementById('step-' + n).classList.remove('hidden');
+  document.getElementById('step-indicator').textContent = `Step ${n} of ${TOTAL}`;
+  currentStep = n;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function next(from) {
+  if (from === 1) {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { alert('Please enter a name'); return; }
+  }
+  setStep(from + 1);
+}
+
+function back(from) {
+  setStep(from - 1);
+}
+
+function finish() {
+  const profile = {
+    userId: 'u_' + Date.now().toString(36),
+    name: document.getElementById('f-name').value.trim(),
+    language: document.getElementById('f-language').value,
+    region: document.getElementById('f-region').value,
+    slang: +document.getElementById('f-slang').value,
+    humour: +document.getElementById('f-humour').value,
+    energy: +document.getElementById('f-energy').value,
+    stage: +document.querySelector('input[name="stage"]:checked').value,
+    createdAt: Date.now()
+  };
+  saveProfile(profile);
+  location.href = 'home.html';
+}
+
+// Pre-fill if returning user
+window.addEventListener('DOMContentLoaded', () => {
+  const p = getProfile();
+  if (p.name) document.getElementById('f-name').value = p.name;
+  if (p.language) document.getElementById('f-language').value = p.language;
+  if (p.region) document.getElementById('f-region').value = p.region;
+  if (p.slang != null) { document.getElementById('f-slang').value = p.slang; document.getElementById('slang-val').textContent = p.slang; }
+  if (p.humour != null) { document.getElementById('f-humour').value = p.humour; document.getElementById('humour-val').textContent = p.humour; }
+  if (p.energy != null) { document.getElementById('f-energy').value = p.energy; document.getElementById('energy-val').textContent = p.energy; }
+});
+</script>
 </body>
 </html>

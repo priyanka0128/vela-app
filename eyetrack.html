@@ -1,292 +1,252 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Eye Tracking — Vela</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/webgazer@2.0.1/dist/webgazer.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eye Tracking — Vela</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="https://cdn.jsdelivr.net/npm/webgazer@2.0.1/dist/webgazer.min.js"></script>
 </head>
 <body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title">Eye tracking</span>
+    <div class="topnav-actions">
+      <a href="home.html" class="btn btn-ghost">← Home</a>
+    </div>
+  </div>
+</nav>
+
 <div class="page">
 
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
-    <h1>Eye tracking</h1>
+  <!-- HTTPS warning -->
+  <div id="https-warning" class="card" style="display:none;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.4);color:#fcd34d;font-size:13px">
+    ⚠️ Camera access requires HTTPS. Open <strong>https://vela-app-theta.vercel.app/eyetrack.html</strong> in Chrome for real eye tracking. Demo mode below works on localhost.
   </div>
 
-  <!-- Calibration -->
+  <!-- Calibration screen -->
   <div id="calibration-screen">
+    <div class="badge badge-lime mb-2">Eye-only communication</div>
+    <h1>👁️ Camera calibration</h1>
+    <p class="page-subtitle">Click each green dot <strong>while looking directly at it</strong>. 9 dots, 5 clicks each — about 30 seconds total.</p>
 
-    <div class="card" style="text-align:center;margin-bottom:16px">
-      <div style="font-size:40px;margin-bottom:10px">👁️</div>
-      <h2>Camera calibration</h2>
-      <p style="font-size:14px">
-        Your webcam tracks where you look on screen.<br>
-        Click each dot while looking directly at it.
-      </p>
-      <div id="cal-status"
-        style="font-size:14px;font-weight:500;color:var(--blue);
-        background:#eef4ff;border-radius:8px;padding:10px;margin-top:12px">
-        Press Start to activate camera
+    <div class="card" id="cal-status-card">
+      <div id="cal-status" style="font-size:14px;font-weight:600;color:var(--lime)">Press Start to activate camera</div>
+    </div>
+
+    <div id="cal-area" style="position:relative;height:380px;background:var(--glass);border:2px solid var(--glass-br);border-radius:var(--radius-lg);margin-bottom:16px;overflow:hidden">
+      <div id="cal-empty" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:var(--softer);font-size:13px">
+        Calibration dots will appear here
       </div>
     </div>
 
-    <div id="cal-area"
-      style="position:relative;height:280px;background:var(--light);
-      border:2px solid var(--border);border-radius:var(--radius);
-      margin-bottom:16px;overflow:hidden">
-      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-        text-align:center;color:var(--muted);font-size:13px">
-        Calibration dots appear here
-      </div>
-    </div>
-
-    <!-- Camera preview box -->
-    <div id="camera-preview-box" style="display:none;margin-bottom:16px">
-      <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:500">
-        Camera preview — make sure your face is visible
-      </div>
-    </div>
-
-    <button class="btn-primary" id="start-btn" onclick="startCal()">
-      Start calibration with camera
+    <button class="btn btn-primary btn-lg btn-block" id="start-btn" onclick="startCal()">
+      Start calibration (real camera)
     </button>
-
-    <button class="btn-secondary" style="margin-top:10px" onclick="skipCal()">
-      Use mouse to simulate eye movement (demo mode)
+    <button class="btn btn-secondary btn-block mt-2" onclick="skipCal()">
+      Demo mode (mouse simulates eyes)
     </button>
-
   </div>
 
   <!-- Communication screen -->
   <div id="eye-comm" style="display:none">
+    <div id="gaze-cursor" style="position:fixed;width:26px;height:26px;border-radius:50%;background:rgba(212,255,77,.4);border:3px solid var(--lime);pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:left .08s,top .08s;display:none;box-shadow:0 0 18px var(--lime)"></div>
 
-    <!-- Gaze cursor -->
-    <div id="gaze-cursor"
-      style="position:fixed;width:22px;height:22px;border-radius:50%;
-      background:rgba(59,130,246,.5);border:2px solid var(--accent);
-      pointer-events:none;z-index:9999;
-      transform:translate(-50%,-50%);
-      transition:left .04s,top .04s;display:none">
+    <div class="output-box" id="eye-output">Look at pictograms to build a sentence...</div>
+
+    <div class="sentence-bar" id="eye-sentence">
+      <span class="text-soft text-sm">Selected pictograms appear here</span>
     </div>
 
-    <!-- Output -->
-    <div class="output-box" id="eye-output">
-      Look at pictograms to build a sentence...
-    </div>
-
-    <!-- Sentence bar -->
-    <div id="eye-sentence"
-      style="background:var(--light);border:1.5px solid var(--border);
-      border-radius:var(--radius);padding:12px 14px;min-height:52px;
-      display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:12px">
-      <span id="eye-empty" style="color:var(--muted);font-size:13px">
-        Selected pictograms appear here
-      </span>
-    </div>
-
-    <!-- Action zones — large for eye targeting -->
     <div style="display:grid;grid-template-columns:2fr 1fr;gap:10px;margin-bottom:16px">
-      <div class="eye-zone" id="zone-speak" data-action="speak"
-        style="background:var(--navy);color:#fff">
+      <div class="eye-zone" data-action="speak" style="background:var(--lime);color:var(--ink);border-radius:var(--radius-lg);padding:22px;text-align:center;font-size:18px;font-weight:800;cursor:pointer;position:relative;overflow:hidden;letter-spacing:.05em;box-shadow:var(--shadow-lime)">
         SPEAK
-        <div class="dwell-bar"></div>
+        <div class="dwell-bar" style="position:absolute;bottom:0;left:0;height:5px;background:var(--ink);width:0%;transition:width .05s;opacity:.4"></div>
       </div>
-      <div class="eye-zone" id="zone-clear" data-action="clear"
-        style="background:var(--red);color:#fff">
+      <div class="eye-zone" data-action="clear" style="background:rgba(239,68,68,.2);color:#fca5a5;border:1.5px solid rgba(239,68,68,.4);border-radius:var(--radius-lg);padding:22px;text-align:center;font-size:18px;font-weight:700;cursor:pointer;position:relative;overflow:hidden;letter-spacing:.05em">
         CLEAR
-        <div class="dwell-bar"></div>
+        <div class="dwell-bar" style="position:absolute;bottom:0;left:0;height:5px;background:#fca5a5;width:0%;transition:width .05s"></div>
       </div>
     </div>
 
-    <!-- Categories -->
-    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
-      <button class="cat-btn active" id="eyecat-basic"    onclick="eyeCat('basic',this)">Basic</button>
-      <button class="cat-btn"        id="eyecat-feelings" onclick="eyeCat('feelings',this)">Feelings</button>
-      <button class="cat-btn"        id="eyecat-food"     onclick="eyeCat('food',this)">Food</button>
-      <button class="cat-btn"        id="eyecat-body"     onclick="eyeCat('body',this)">Body</button>
+    <div class="tabs">
+      <div class="tab active" onclick="eyeCat('basic',this)">Basic</div>
+      <div class="tab" onclick="eyeCat('feelings',this)">Feelings</div>
+      <div class="tab" onclick="eyeCat('food',this)">Food</div>
+      <div class="tab" onclick="eyeCat('body',this)">Body</div>
     </div>
 
-    <!-- Large pictogram grid -->
-    <div id="eye-grid"
-      style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px">
-    </div>
+    <div class="picto-grid" id="eye-grid"></div>
 
-    <div style="display:flex;gap:8px">
-      <button class="btn-secondary" style="flex:1" onclick="recalibrate()">
-        Recalibrate
-      </button>
-      <button class="btn-secondary" style="flex:1"
-        onclick="window.location.href='home.html'">
-        ← Home
-      </button>
+    <div class="row" style="gap:8px">
+      <button class="btn btn-secondary" style="flex:1" onclick="recalibrate()">Recalibrate</button>
+      <button class="btn btn-secondary" style="flex:1" onclick="location.href='home.html'">← Home</button>
     </div>
-
   </div>
 
 </div>
 
+<style>
+  .picto { padding: 14px 8px; }
+</style>
+
 <script src="js/app.js"></script>
 <script>
+const PICTOS = {
+  basic:    [{e:'✅',l:'Yes'},{e:'❌',l:'No'},{e:'🆘',l:'Help'},{e:'🙏',l:'Please'},{e:'🙌',l:'Thank you'},{e:'⏳',l:'Wait'},{e:'👍',l:'Good'},{e:'👎',l:'Bad'},{e:'🔄',l:'Again'}],
+  feelings: [{e:'😊',l:'Happy'},{e:'😢',l:'Sad'},{e:'😤',l:'Angry'},{e:'😴',l:'Tired'},{e:'🤕',l:'Pain'},{e:'🥰',l:'Love'},{e:'😌',l:'Calm'},{e:'😰',l:'Worried'},{e:'🤔',l:'Confused'}],
+  food:     [{e:'🍽️',l:'Eat'},{e:'💧',l:'Water'},{e:'☕',l:'Coffee'},{e:'🥤',l:'Drink'},{e:'🍞',l:'Bread'},{e:'🍎',l:'Fruit'},{e:'🍲',l:'Soup'},{e:'🧃',l:'Juice'},{e:'🍌',l:'Banana'}],
+  body:     [{e:'💊',l:'Medicine'},{e:'🚽',l:'Toilet'},{e:'🛁',l:'Bath'},{e:'🤢',l:'Nausea'},{e:'🤒',l:'Fever'},{e:'🩺',l:'Doctor'},{e:'👕',l:'Clothes'},{e:'🌡️',l:'Temp'},{e:'💉',l:'Injection'}]
+};
 
-// Check browser on load
+const CAL_POINTS = [
+  {x:'10%',y:'10%'},{x:'50%',y:'10%'},{x:'90%',y:'10%'},
+  {x:'10%',y:'50%'},{x:'50%',y:'50%'},{x:'90%',y:'50%'},
+  {x:'10%',y:'90%'},{x:'50%',y:'90%'},{x:'90%',y:'90%'}
+];
+
+let selected = [], gazerActive = false, mouseMode = false;
+let dwellEl = null, dwellCount = 0, dwellLoop = null;
+let calStep = 0, clicksOnDot = 0;
+const DWELL_MS = 1500;
+const CLICKS_PER_DOT = 5;
+const GAZE_BUFFER_SIZE = 8;
+let gazeBuffer = [];
+
 window.addEventListener('DOMContentLoaded', () => {
-  if (!window.chrome) {
-    document.getElementById('cal-status').innerHTML =
-      '⚠️ <strong>Chrome required</strong> — Eye tracking uses WebGazer which only works in Chrome. ' +
-      'Please copy this URL and open it in Chrome, or use demo mode below.';
-    document.getElementById('cal-status').style.background = '#fef9c3';
-    document.getElementById('cal-status').style.color = 'var(--amber)';
+  if (location.protocol === 'http:' && location.hostname === 'localhost') {
+    document.getElementById('https-warning').style.display = 'block';
+  }
+  if (!navigator.mediaDevices?.getUserMedia) {
+    setCalStatus('⚠️ Your browser does not support camera access. Use Chrome on a secure (HTTPS) URL.');
+    document.getElementById('start-btn').disabled = true;
   }
 });
 
-const PICTOS = {
-  basic: [
-    {e:'✅',l:'Yes'},{e:'❌',l:'No'},{e:'🆘',l:'Help'},
-    {e:'🙏',l:'Please'},{e:'🙌',l:'Thank you'},{e:'⏳',l:'Wait'},
-    {e:'👍',l:'Good'},{e:'👎',l:'Bad'},{e:'🔄',l:'Again'}
-  ],
-  feelings: [
-    {e:'😊',l:'Happy'},{e:'😢',l:'Sad'},{e:'😤',l:'Angry'},
-    {e:'😴',l:'Tired'},{e:'🤕',l:'Pain'},{e:'🥰',l:'Love'},
-    {e:'😌',l:'Calm'},{e:'😰',l:'Worried'},{e:'🤔',l:'Confused'}
-  ],
-  food: [
-    {e:'🍽️',l:'Eat'},{e:'💧',l:'Water'},{e:'☕',l:'Coffee'},
-    {e:'🥤',l:'Drink'},{e:'🍞',l:'Bread'},{e:'🍎',l:'Fruit'},
-    {e:'🍲',l:'Soup'},{e:'🧃',l:'Juice'},{e:'🍌',l:'Banana'}
-  ],
-  body: [
-    {e:'💊',l:'Medicine'},{e:'🚽',l:'Toilet'},{e:'🛁',l:'Bath'},
-    {e:'🤢',l:'Nausea'},{e:'🤒',l:'Fever'},{e:'🩺',l:'Doctor'},
-    {e:'👕',l:'Clothes'},{e:'🌡️',l:'Temp'},{e:'💉',l:'Injection'}
-  ]
-};
-
-let selected    = [];
-let gazerActive = false;
-let dwellEl     = null;
-let dwellCount  = 0;
-let dwellLoop   = null;
-let calStep     = 0;
-let mouseMode   = false;
-const DWELL_MS  = 1000;
-
-const CAL_POINTS = [
-  {x:'12%',y:'12%'},{x:'88%',y:'12%'},{x:'50%',y:'50%'},
-  {x:'12%',y:'85%'},{x:'88%',y:'85%'}
-];
-
-// ── CALIBRATION ───────────────────────────────────────
-
-function startCal() {
+async function startCal() {
   const btn = document.getElementById('start-btn');
-  btn.disabled    = true;
-  btn.textContent = 'Starting camera...';
-  setCalStatus('Requesting camera access...');
+  btn.disabled = true;
+  btn.textContent = 'Requesting camera...';
+  setCalStatus('Allow camera access when Chrome asks...');
 
-  navigator.mediaDevices.getUserMedia({ video: true })
-    .then(stream => {
-      stream.getTracks().forEach(t => t.stop());
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    stream.getTracks().forEach(t => t.stop());
 
-      webgazer
-        .setGazeListener(onGaze)
-        .begin()
-        .then(() => {
-          // Hide WebGazer's default UI elements
-          try {
-            const videoEl = document.getElementById('webgazerVideoFeed');
-            const faceEl  = document.getElementById('webgazerFaceOverlay');
-            const dotEl   = document.getElementById('webgazerGazeDot');
-            if (videoEl) videoEl.style.cssText =
-              'position:fixed!important;top:10px!important;right:10px!important;' +
-              'width:140px!important;height:105px!important;' +
-              'border-radius:10px!important;border:2px solid #3b82f6!important;' +
-              'z-index:9998!important;opacity:.85!important';
-            if (dotEl) dotEl.style.display = 'none';
-          } catch(e) {}
+    setCalStatus('Starting eye tracker...');
+    webgazer.params.showVideoPreview = true;
+    webgazer.params.showFaceOverlay = true;
+    webgazer.params.showFaceFeedbackBox = true;
+    webgazer.params.showGazeDot = false;
+    await webgazer.setGazeListener(onGaze).begin();
+    await new Promise(r => setTimeout(r, 1500));
 
-          setCalStatus('Camera ready — look at each blue dot and click it');
-          renderCalDots();
-
-        }).catch(err => {
-          setCalStatus('WebGazer error: ' + err.message + ' — use demo mode below');
-          btn.disabled    = false;
-          btn.textContent = 'Try again';
-        });
-
-    }).catch(err => {
-      setCalStatus('Camera denied — allow camera access or use demo mode below');
-      btn.disabled    = false;
-      btn.textContent = 'Try again';
-    });
+    styleWebGazerPreview();
+    setCalStatus('Click dot 1 — look directly at it as you click. 5 clicks per dot.');
+    document.getElementById('cal-empty').style.display = 'none';
+    renderCalDots();
+  } catch (err) {
+    if (err.name === 'NotAllowedError') setCalStatus('❌ Camera permission denied. Reload and click Allow.');
+    else if (err.name === 'NotFoundError') setCalStatus('❌ No camera detected.');
+    else if (location.protocol === 'http:') setCalStatus('❌ Camera requires HTTPS. Try the Vercel URL.');
+    else setCalStatus('❌ Camera error: ' + err.message);
+    btn.disabled = false;
+    btn.textContent = 'Try again';
+  }
 }
 
+function styleWebGazerPreview() {
+  ['webgazerVideoFeed','webgazerFaceOverlay','webgazerFaceFeedbackBox'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.cssText = `
+      position:fixed!important;top:80px!important;right:14px!important;
+      width:160px!important;height:120px!important;
+      border-radius:12px!important;z-index:9998!important;opacity:.92!important;
+      border:2px solid rgba(212,255,77,.4)!important`;
+  });
+}
 
 function setCalStatus(msg) {
-  document.getElementById('cal-status').textContent = msg;
+  document.getElementById('cal-status').innerHTML = msg;
 }
 
 function renderCalDots() {
   const area = document.getElementById('cal-area');
-  area.innerHTML = '';
-
+  area.querySelectorAll('.cal-dot').forEach(d => d.remove());
   CAL_POINTS.forEach((pt, i) => {
     const dot = document.createElement('div');
-    dot.id = 'cal-dot-' + i;
+    dot.className = 'cal-dot';
+    dot.id = 'dot-' + i;
     dot.style.cssText = `
       position:absolute;left:${pt.x};top:${pt.y};
-      width:40px;height:40px;border-radius:50%;
-      background:${i === 0 ? 'var(--navy)' : '#ddd'};
+      width:48px;height:48px;border-radius:50%;
+      background:${i === calStep ? 'var(--lime)' : 'rgba(255,255,255,.25)'};
       cursor:pointer;transform:translate(-50%,-50%);
       display:flex;align-items:center;justify-content:center;
-      color:#fff;font-size:14px;font-weight:600;
-      box-shadow:0 2px 8px rgba(0,0,0,.2);
-      transition:all .25s;border:3px solid transparent`;
-    dot.textContent = i + 1;
-    dot.onclick     = () => completeDot(i);
-
-    // Pulse animation for active dot
-    if (i === 0) {
-      dot.style.animation = 'pulse 1.2s infinite';
-      dot.style.border    = '3px solid rgba(255,255,255,.5)';
-    }
+      color:${i === calStep ? 'var(--ink)' : 'var(--white)'};font-size:13px;font-weight:800;
+      box-shadow:0 4px 12px rgba(0,0,0,.3);
+      transition:all .2s;
+      ${i === calStep ? 'animation:pulse-dot 1.2s infinite' : ''}`;
+    dot.textContent = i === calStep ? '0/5' : (i+1);
+    dot.onclick = () => clickCalDot(i);
     area.appendChild(dot);
   });
 }
 
-function completeDot(i) {
-  const dot = document.getElementById('cal-dot-' + i);
-  if (!dot || dot.dataset.done) return;
-  dot.dataset.done   = '1';
-  dot.style.background = 'var(--green)';
-  dot.style.animation  = 'none';
-  dot.textContent      = '✓';
+const styleEl = document.createElement('style');
+styleEl.textContent = `@keyframes pulse-dot { 0%,100% { transform: translate(-50%,-50%) scale(1); } 50% { transform: translate(-50%,-50%) scale(1.15); } }`;
+document.head.appendChild(styleEl);
 
-  calStep = i + 1;
+function clickCalDot(i) {
+  if (i !== calStep) return;
+  clicksOnDot++;
+  const dot = document.getElementById('dot-' + i);
+  dot.textContent = clicksOnDot + '/5';
 
-  if (calStep < CAL_POINTS.length) {
-    const next = document.getElementById('cal-dot-' + calStep);
-    if (next) {
-      next.style.background = 'var(--navy)';
-      next.style.animation  = 'pulse 1.2s infinite';
-      next.style.border     = '3px solid rgba(255,255,255,.5)';
+  if (clicksOnDot >= CLICKS_PER_DOT) {
+    dot.style.background = 'var(--teal-500)';
+    dot.style.color = 'white';
+    dot.style.animation = 'none';
+    dot.textContent = '✓';
+    clicksOnDot = 0;
+    calStep++;
+    if (calStep < CAL_POINTS.length) {
+      const next = document.getElementById('dot-' + calStep);
+      if (next) {
+        next.style.background = 'var(--lime)';
+        next.style.color = 'var(--ink)';
+        next.style.animation = 'pulse-dot 1.2s infinite';
+        next.textContent = '0/5';
+      }
+      setCalStatus(`Dot ${calStep + 1} of 9 — keep looking at the green dot as you click`);
+    } else {
+      calComplete();
     }
-    setCalStatus(`${calStep} of 5 done — look at dot ${calStep + 1} and click it`);
-  } else {
-    calComplete();
   }
 }
 
 function calComplete() {
-  setCalStatus('✓ Calibration complete! Starting eye communication...');
+  setCalStatus('✓ Calibration complete!');
   setTimeout(() => {
-    try { webgazer.showVideoPreview(false); } catch(e) {}
+    ['webgazerVideoFeed','webgazerFaceOverlay','webgazerFaceFeedbackBox'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    });
     showEyeComm();
     gazerActive = true;
     document.getElementById('gaze-cursor').style.display = 'block';
-  }, 800);
+  }, 1000);
 }
 
 function skipCal() {
@@ -301,16 +261,22 @@ function skipCal() {
 
 function showEyeComm() {
   document.getElementById('calibration-screen').style.display = 'none';
-  document.getElementById('eye-comm').style.display            = 'block';
+  document.getElementById('eye-comm').style.display = 'block';
   loadGrid('basic');
+  document.querySelectorAll('.eye-zone').forEach(el => {
+    el.addEventListener('click', () => activateTarget(el));
+  });
 }
-
-// ── GAZE ─────────────────────────────────────────────
 
 function onGaze(data) {
   if (!data || !gazerActive) return;
-  moveCursor(data.x, data.y);
-  handleDwellAt(data.x, data.y);
+  gazeBuffer.push({x: data.x, y: data.y});
+  if (gazeBuffer.length > GAZE_BUFFER_SIZE) gazeBuffer.shift();
+  const avg = gazeBuffer.reduce((acc, p) => ({x: acc.x + p.x, y: acc.y + p.y}), {x:0, y:0});
+  const smoothX = avg.x / gazeBuffer.length;
+  const smoothY = avg.y / gazeBuffer.length;
+  moveCursor(smoothX, smoothY);
+  handleDwellAt(smoothX, smoothY);
 }
 
 function moveCursor(x, y) {
@@ -320,23 +286,25 @@ function moveCursor(x, y) {
 }
 
 function handleDwellAt(x, y) {
-  const el     = document.elementFromPoint(x, y);
+  const el = document.elementFromPoint(x, y);
   if (!el) { resetDwell(); return; }
-
-  const picto  = el.closest('.eye-picto');
-  const zone   = el.closest('.eye-zone');
+  const picto = el.closest('.picto');
+  const zone  = el.closest('.eye-zone');
   const target = picto || zone;
 
   if (target) {
     if (dwellEl === target) return;
     resetDwell();
-    dwellEl    = target;
-    target.style.borderColor = 'var(--accent)';
+    dwellEl = target;
+    if (target.classList.contains('picto')) {
+      target.style.borderColor = 'var(--lime)';
+      target.style.background = 'rgba(212,255,77,.12)';
+    }
     dwellLoop = setInterval(() => {
       dwellCount += 50;
-      const pct  = Math.min((dwellCount / DWELL_MS) * 100, 100);
-      const bar  = target.querySelector('.dwell-bar');
-      if (bar) bar.style.width = pct + '%';
+      const pct = Math.min((dwellCount / DWELL_MS) * 100, 100);
+      const bar = target.querySelector('.dwell-bar') || createDwellBar(target);
+      bar.style.width = pct + '%';
       if (dwellCount >= DWELL_MS) {
         resetDwell();
         activateTarget(target);
@@ -347,24 +315,35 @@ function handleDwellAt(x, y) {
   }
 }
 
+function createDwellBar(target) {
+  const bar = document.createElement('div');
+  bar.className = 'dwell-bar';
+  bar.style.cssText = 'position:absolute;bottom:0;left:0;height:4px;background:var(--lime);width:0%;transition:width .05s';
+  target.style.position = 'relative';
+  target.appendChild(bar);
+  return bar;
+}
+
 function resetDwell() {
   clearInterval(dwellLoop);
   dwellCount = 0;
   if (dwellEl) {
     const bar = dwellEl.querySelector('.dwell-bar');
     if (bar) bar.style.width = '0%';
-    if (dwellEl.classList.contains('eye-picto')) {
-      dwellEl.style.borderColor = 'var(--border)';
+    if (dwellEl.classList.contains('picto')) {
+      dwellEl.style.borderColor = '';
+      dwellEl.style.background = '';
     }
     dwellEl = null;
   }
 }
 
 function activateTarget(el) {
-  if (el.classList.contains('eye-picto')) {
-    addSelected({ e: el.dataset.e, l: el.dataset.l });
-    el.style.borderColor = 'var(--green)';
-    setTimeout(() => { el.style.borderColor = 'var(--border)'; }, 400);
+  if (el.classList.contains('picto')) {
+    addSelected({e: el.dataset.e, l: el.dataset.l});
+    el.style.borderColor = '#86efac';
+    el.style.background = 'rgba(34,197,94,.15)';
+    setTimeout(() => { el.style.borderColor = ''; el.style.background = ''; }, 500);
   } else if (el.dataset.action === 'speak') {
     eyeSpeak();
   } else if (el.dataset.action === 'clear') {
@@ -372,22 +351,18 @@ function activateTarget(el) {
   }
 }
 
-// ── GRID ─────────────────────────────────────────────
-
 function loadGrid(cat) {
-  const grid  = document.getElementById('eye-grid');
-  const items = PICTOS[cat] || [];
+  const grid = document.getElementById('eye-grid');
   grid.innerHTML = '';
-
-  items.forEach(p => {
+  PICTOS[cat].forEach(p => {
     const btn = document.createElement('div');
-    btn.className      = 'eye-picto';
-    btn.dataset.e      = p.e;
-    btn.dataset.l      = p.l;
+    btn.className = 'picto';
+    btn.dataset.e = p.e;
+    btn.dataset.l = p.l;
     btn.innerHTML = `
-      <span style="font-size:38px;display:block;margin-bottom:6px">${p.e}</span>
-      <span style="font-size:13px;font-weight:500;color:var(--text)">${p.l}</span>
-      <div class="dwell-bar"></div>`;
+      <div class="picto-emoji">${p.e}</div>
+      <div class="picto-label">${p.l}</div>
+      <div class="dwell-bar" style="position:absolute;bottom:0;left:0;height:4px;background:var(--lime);width:0%;transition:width .05s"></div>`;
     btn.onclick = () => addSelected(p);
     grid.appendChild(btn);
   });
@@ -395,80 +370,67 @@ function loadGrid(cat) {
 
 function eyeCat(cat, btn) {
   loadGrid(cat);
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.closest('.tabs').querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 }
 
-// ── SENTENCE ─────────────────────────────────────────
-
 function addSelected(p) {
   selected.push(p);
-  updateSentenceBar();
-  document.getElementById('eye-output').textContent =
-    selected.map(s => s.l).join(' + ');
+  updateBar();
+  document.getElementById('eye-output').textContent = selected.map(s => s.l).join(' + ');
 }
 
-function updateSentenceBar() {
-  const bar   = document.getElementById('eye-sentence');
+function updateBar() {
+  const bar = document.getElementById('eye-sentence');
   bar.innerHTML = '';
-
-  if (selected.length === 0) {
-    bar.innerHTML =
-      '<span style="color:var(--muted);font-size:13px">Selected pictograms appear here</span>';
+  if (!selected.length) {
+    bar.innerHTML = '<span class="text-soft text-sm">Selected pictograms appear here</span>';
     return;
   }
-
   selected.forEach((p, i) => {
     const chip = document.createElement('span');
-    chip.className = 'sentence-chip';
-    chip.innerHTML = `${p.e} ${p.l} <span class="sentence-chip-remove">✕</span>`;
-    chip.onclick   = () => { selected.splice(i,1); updateSentenceBar(); };
+    chip.className = 'chip';
+    chip.innerHTML = `${p.e} ${p.l} <span class="x">✕</span>`;
+    chip.onclick = () => { selected.splice(i,1); updateBar(); };
     bar.appendChild(chip);
   });
 }
 
-function eyeSpeak() {
+async function eyeSpeak() {
   if (!selected.length) return;
-  const text   = selected.map(p => p.l).join(', ');
-  const output = document.getElementById('eye-output');
-  output.textContent = 'Speaking...';
-  rewriteAndSpeak(text).then(r => { if (r) output.textContent = r; });
+  const text = selected.map(p => p.l).join(', ');
+  const out = document.getElementById('eye-output');
+  out.textContent = 'Speaking...';
+  if (typeof rewriteAndSpeak === 'function') {
+    const result = await rewriteAndSpeak(text);
+    if (result) out.textContent = result;
+  }
   selected = [];
-  updateSentenceBar();
+  updateBar();
 }
 
 function eyeClear() {
   selected = [];
-  updateSentenceBar();
-  document.getElementById('eye-output').textContent =
-    'Look at pictograms to build a sentence...';
+  updateBar();
+  document.getElementById('eye-output').textContent = 'Look at pictograms to build a sentence...';
 }
-
-// ── RECALIBRATE ───────────────────────────────────────
 
 function recalibrate() {
-  document.getElementById('calibration-screen').style.display = 'block';
-  document.getElementById('eye-comm').style.display           = 'none';
-  gazerActive = false;
-  calStep     = 0;
-  mouseMode   = false;
-  document.getElementById('gaze-cursor').style.display = 'none';
-  document.getElementById('start-btn').disabled    = false;
-  document.getElementById('start-btn').textContent =
-    'Start calibration with camera';
-  setCalStatus('Press Start to activate camera');
-  document.getElementById('cal-area').innerHTML = `
-    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      text-align:center;color:var(--muted);font-size:13px">
-      Calibration dots appear here
-    </div>`;
   try { webgazer.end(); } catch(e) {}
+  gazerActive = false; mouseMode = false;
+  calStep = 0; clicksOnDot = 0;
+  selected = []; gazeBuffer = [];
+  document.getElementById('gaze-cursor').style.display = 'none';
+  document.getElementById('calibration-screen').style.display = 'block';
+  document.getElementById('eye-comm').style.display = 'none';
+  document.getElementById('cal-area').querySelectorAll('.cal-dot').forEach(d => d.remove());
+  document.getElementById('cal-empty').style.display = 'block';
+  document.getElementById('start-btn').disabled = false;
+  document.getElementById('start-btn').textContent = 'Start calibration (real camera)';
+  setCalStatus('Press Start to activate camera');
 }
 
-window.addEventListener('beforeunload', () => {
-  try { webgazer.end(); } catch(e) {}
-});
-
+window.addEventListener('beforeunload', () => { try { webgazer.end(); } catch(e) {} });
 </script>
 </body>
 </html>

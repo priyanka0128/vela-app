@@ -1,111 +1,297 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Caregiver — Vela</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caregiver Portal — Vela</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page">
 
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
-    <a href="home.html" style="font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">← Home</a>
-    <h1>Caregiver</h1>
-  </div>
-
-  <!-- PIN gate -->
-  <div id="pin-gate">
-    <div class="card" style="text-align:center;padding:32px 20px">
-      <div style="font-size:48px;margin-bottom:14px">🔒</div>
-      <h2 style="margin-bottom:6px">Caregiver access</h2>
-      <p style="font-size:14px">Enter your PIN to manage patient settings</p>
-      <input type="password" id="pin-input"
-        placeholder="Enter PIN"
-        maxlength="6"
-        style="text-align:center;font-size:20px;letter-spacing:.3em;margin-bottom:14px">
-      <button class="btn-primary" onclick="checkPin()">Enter →</button>
-      <p style="font-size:12px;color:var(--muted);margin-top:12px;margin-bottom:0">
-        Default PIN is 1234
-      </p>
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title">Caregiver portal</span>
+    <div class="topnav-actions">
+      <a href="home.html" class="btn btn-ghost">← Home</a>
     </div>
   </div>
+</nav>
 
-  <!-- Caregiver panel -->
-  <div id="carer-panel" style="display:none">
+<!-- PIN entry screen -->
+<div class="page" id="pin-screen" style="max-width:420px;padding-top:80px">
+  <div class="card card-lg" style="text-align:center">
+    <div style="margin-bottom:14px"><span class="vela-logo" style="height:36px;color:var(--ink)"><svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" style="height:36px"><text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text><g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"><path d="M 0 4 Q 12 14, 0 24"/><path d="M 8 4 Q 20 14, 8 24"/><path d="M 16 4 Q 28 14, 16 24"/></g></svg></span></div>
+    <h1 style="font-size:24px;margin-bottom:6px">Caregiver access</h1>
+    <p class="page-subtitle">Enter the 4-digit PIN to continue</p>
 
-    <!-- Patient info -->
-    <div class="voice-card" style="margin-bottom:16px">
-      <div style="font-size:12px;opacity:.7;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;font-weight:500">
-        Current patient
-      </div>
-      <div class="voice-card-name" id="patient-name-display">—</div>
-      <div class="voice-card-sub" id="patient-details-display">—</div>
+    <div class="field">
+      <input class="input" id="pin-input" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]{4}" placeholder="• • • •" style="font-size:24px;text-align:center;letter-spacing:14px">
     </div>
 
-    <!-- Add phrase -->
-    <div class="card">
-      <h2>Add quick phrase</h2>
-      <p style="font-size:13px">These appear as instant-tap options on the communication screen</p>
-      <label>Phrase text</label>
-      <input type="text" id="phrase-input" placeholder="e.g. I need my medication now">
-      <button class="btn-primary" onclick="addPhrase()">Add phrase →</button>
-    </div>
+    <button class="btn btn-primary btn-block btn-lg" onclick="checkPin()">Unlock</button>
+    <div class="text-sm text-soft mt-2" id="pin-msg"></div>
 
-    <!-- Saved phrases -->
-    <div class="card">
-      <h2>Saved phrases</h2>
-      <div id="phrases-list">
-        <p style="color:var(--muted);font-size:13px">No phrases added yet</p>
-      </div>
-    </div>
-
-    <!-- All patient voices — caregiver only -->
-<div class="card">
-  <h2>All patient voices</h2>
-  <p style="font-size:13px">Test and assign any stored patient voice to the current session.</p>
-  <div id="all-voices-container">
-    <p style="color:var(--muted);font-size:13px">Loading...</p>
+    <div class="divider"></div>
+    <div class="text-xs text-softer">First-time setup? Default PIN is <strong style="color:var(--lime)">0000</strong>. Change it after first login.</div>
   </div>
 </div>
 
-    <!-- Accessibility -->
-    <div class="card">
-      <h2>Accessibility settings</h2>
-      <div class="check-row" onclick="toggleHighContrast()">
-        <input type="checkbox" id="hc-toggle">
-        <div class="check-row-text">
-          <strong>High contrast mode</strong><br>
-          <span style="color:var(--muted);font-size:13px">Black background for easier reading</span>
-        </div>
+<!-- Portal -->
+<div class="page page-wide" id="portal" style="display:none">
+
+  <div class="badge badge-accent mb-2">Caregiver portal</div>
+  <h1>Welcome back</h1>
+  <p class="page-subtitle">Manage voices, phrases, and view consolidated patient reports.</p>
+
+  <!-- Featured: Patient Report CTA -->
+  <a class="hub-card card-clinical" href="patient-report.html" style="margin-bottom:18px;display:block">
+    <span class="hub-arrow">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+    </span>
+    <div class="hub-icon clinical">📊</div>
+    <div class="hub-title">Open consolidated patient report</div>
+    <div class="hub-desc">Communication activity, emotional patterns, voice health, top phrases, and risk indicators in one view. Printable for clinical appointments.</div>
+  </a>
+
+  <!-- Summary -->
+  <div class="card card-lg" style="margin-bottom:18px">
+    <div class="row-between mb-4">
+      <div class="card-title" style="margin:0">Today's summary</div>
+      <span class="badge badge-green"><span class="status-dot live" style="width:6px;height:6px"></span>Live</span>
+    </div>
+    <div class="hub-grid" style="grid-template-columns:repeat(3,1fr);gap:12px">
+      <div class="card-light" style="padding:16px;border-radius:14px">
+        <div class="text-xs text-soft">Messages spoken</div>
+        <div style="font-size:28px;font-weight:700;color:var(--lime);margin-top:4px" id="sum-messages">0</div>
       </div>
-      <div class="check-row" onclick="toggleLargeText()">
-        <input type="checkbox" id="lt-toggle">
-        <div class="check-row-text">
-          <strong>Large text</strong><br>
-          <span style="color:var(--muted);font-size:13px">Increase text size throughout app</span>
-        </div>
+      <div class="card-light" style="padding:16px;border-radius:14px">
+        <div class="text-xs text-soft">Voice samples</div>
+        <div style="font-size:28px;font-weight:700;color:var(--lime);margin-top:4px" id="sum-voices">0</div>
+      </div>
+      <div class="card-light" style="padding:16px;border-radius:14px">
+        <div class="text-xs text-soft">Most-used emotion</div>
+        <div style="font-size:18px;font-weight:600;color:var(--white);margin-top:8px" id="sum-emotion">—</div>
       </div>
     </div>
-
-    <!-- Change PIN -->
-    <div class="card">
-      <h2>Change PIN</h2>
-      <input type="password" id="new-pin"
-        placeholder="New PIN (4–6 digits)"
-        maxlength="6">
-      <button class="btn-primary" onclick="changePin()">Save new PIN</button>
-    </div>
-
-    <button class="btn-secondary" onclick="window.location.href='home.html'">
-      ← Back to patient view
-    </button>
-
   </div>
+
+  <!-- Voices -->
+  <div class="card-title mt-6">Registered voices (all patients)</div>
+  <div id="all-voices">
+    <div class="text-soft text-sm">No voices registered yet.</div>
+  </div>
+
+  <!-- Quick phrases -->
+  <div class="card-title mt-6">Quick phrases</div>
+  <p class="text-sm text-soft mb-4">Pre-set phrases the patient can tap to speak instantly.</p>
+
+  <div class="card">
+    <div class="field">
+      <label class="label">Add a new phrase</label>
+      <div class="row" style="gap:8px">
+        <input class="input" id="new-phrase" placeholder="e.g. I'm in pain — please call the nurse" style="flex:1">
+        <button class="btn btn-primary" onclick="addPhrase()">Add</button>
+      </div>
+    </div>
+    <div id="phrases-list"></div>
+  </div>
+
+  <!-- Change PIN -->
+  <div class="card-title mt-6">Security</div>
+  <div class="card">
+    <div class="field">
+      <label class="label">New PIN</label>
+      <input class="input" id="new-pin" type="password" inputmode="numeric" maxlength="4" placeholder="4 digits">
+    </div>
+    <button class="btn btn-secondary btn-block" onclick="changePin()">Update PIN</button>
+    <div class="text-sm mt-2" id="pin-update-msg"></div>
+  </div>
+
+  <button class="btn btn-danger btn-block mt-6" onclick="lockPortal()">🔒 Lock portal</button>
 
 </div>
 
 <script src="js/app.js"></script>
-<script src="js/caregiver.js"></script>
+<script>
+const DEFAULT_PIN = '0000';
+
+function getCarerPin() {
+  return localStorage.getItem('vela_carer_pin') || DEFAULT_PIN;
+}
+
+function setCarerPin(pin) {
+  localStorage.setItem('vela_carer_pin', pin);
+}
+
+function getPhrases() {
+  try { return JSON.parse(localStorage.getItem('vela_phrases') || '[]'); } catch { return []; }
+}
+
+function savePhrases(arr) {
+  localStorage.setItem('vela_phrases', JSON.stringify(arr));
+}
+
+// ─── PIN entry ──────────────────────────────────────────────
+function checkPin() {
+  const entered = document.getElementById('pin-input').value;
+  if (entered === getCarerPin()) {
+    sessionStorage.setItem('vela_carer_unlocked', '1');
+    // Honor ?return= query param so we can deep-link from patient report
+    const params = new URLSearchParams(location.search);
+    const ret = params.get('return');
+    if (ret && ['patient-report.html'].includes(ret)) {
+      location.href = ret;
+      return;
+    }
+    showPortal();
+  } else {
+    document.getElementById('pin-msg').innerHTML = '<span style="color:#fca5a5">❌ Wrong PIN — try again</span>';
+    document.getElementById('pin-input').value = '';
+  }
+}
+
+function showPortal() {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('portal').style.display = 'block';
+  renderSummary();
+  renderAllVoices();
+  renderPhrases();
+}
+
+function lockPortal() {
+  sessionStorage.removeItem('vela_carer_unlocked');
+  location.reload();
+}
+
+// ─── Summary ────────────────────────────────────────────────
+function renderSummary() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const history = getHistory().filter(h => h.at >= today.getTime());
+  document.getElementById('sum-messages').textContent = history.length;
+  document.getElementById('sum-voices').textContent = getCarerRegistry().length;
+
+  // Most used emotion
+  const counts = {};
+  history.forEach(h => { counts[h.emotion] = (counts[h.emotion] || 0) + 1; });
+  const top = Object.entries(counts).sort((a,b) => b[1] - a[1])[0];
+  document.getElementById('sum-emotion').textContent = top ? top[0].charAt(0).toUpperCase() + top[0].slice(1) : 'None yet';
+}
+
+// ─── Voices ─────────────────────────────────────────────────
+function renderAllVoices() {
+  const list = document.getElementById('all-voices');
+  const voices = getCarerRegistry();
+  if (!voices.length) {
+    list.innerHTML = '<div class="text-soft text-sm">No voices registered yet.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  voices.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'voice-card';
+    card.innerHTML = `
+      <div class="voice-card-info">
+        <div class="voice-card-name">${v.voiceName}</div>
+        <div class="voice-card-sub">Patient: ${v.patientName} · ${new Date(v.createdAt).toLocaleDateString()}</div>
+      </div>
+      <div class="voice-card-actions">
+        <button class="btn btn-secondary" style="padding:8px 12px;font-size:12px" onclick="testCarerVoice('${v.voiceId}')">Test</button>
+        <button class="btn btn-danger" style="padding:8px 12px;font-size:12px" onclick="removeCarerVoice('${v.voiceId}')">×</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+async function testCarerVoice(voiceId) {
+  try {
+    const res = await fetch('/api/speak-cloned', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: 'Hello, this is a test.', voiceId, emotion: 'neutral' })
+    });
+    const blob = await res.blob();
+    new Audio(URL.createObjectURL(blob)).play();
+  } catch (e) { alert('Test failed: ' + e.message); }
+}
+
+function removeCarerVoice(voiceId) {
+  if (!confirm('Remove this voice from the registry?')) return;
+  removeVoiceFromCaregiver(voiceId);
+  renderAllVoices();
+  renderSummary();
+}
+
+// ─── Phrases ────────────────────────────────────────────────
+function renderPhrases() {
+  const list = document.getElementById('phrases-list');
+  const phrases = getPhrases();
+  if (!phrases.length) {
+    list.innerHTML = '<div class="text-soft text-sm mt-2">No quick phrases yet.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  phrases.forEach((p, i) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid var(--glass-br)';
+    row.innerHTML = `
+      <span style="flex:1;font-size:14px">${p}</span>
+      <button class="btn btn-secondary" style="padding:6px 10px;font-size:11px" onclick="speakPhrase('${p.replace(/'/g, "\\'")}')">Test</button>
+      <button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="deletePhrase(${i})">×</button>`;
+    list.appendChild(row);
+  });
+}
+
+function addPhrase() {
+  const input = document.getElementById('new-phrase');
+  const text = input.value.trim();
+  if (!text) return;
+  const phrases = getPhrases();
+  phrases.push(text);
+  savePhrases(phrases);
+  input.value = '';
+  renderPhrases();
+}
+
+function deletePhrase(i) {
+  const phrases = getPhrases();
+  phrases.splice(i, 1);
+  savePhrases(phrases);
+  renderPhrases();
+}
+
+async function speakPhrase(text) {
+  await speakText(text, 'neutral');
+}
+
+// ─── PIN change ─────────────────────────────────────────────
+function changePin() {
+  const newPin = document.getElementById('new-pin').value;
+  if (!/^\d{4}$/.test(newPin)) {
+    document.getElementById('pin-update-msg').innerHTML = '<span style="color:#fca5a5">PIN must be 4 digits</span>';
+    return;
+  }
+  setCarerPin(newPin);
+  document.getElementById('new-pin').value = '';
+  document.getElementById('pin-update-msg').innerHTML = '<span style="color:#86efac">✓ PIN updated</span>';
+}
+
+// ─── Init ───────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  if (sessionStorage.getItem('vela_carer_unlocked') === '1') showPortal();
+  document.getElementById('pin-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPin();
+  });
+});
+</script>
 </body>
 </html>

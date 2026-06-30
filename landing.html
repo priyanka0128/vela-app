@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vela — ALS takes voices. Vela keeps them.</title>
+<meta name="description" content="The first ALS platform that preserves your voice, learns how you speak, and gives clinicians the data they've never had.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg:         #edf0eb;
+    --bg-alt:     #f7faf6;
+    --surface:    #ffffff;
+    --ink:        #1a2e2a;
+    --ink-soft:   #4a5e58;
+    --ink-softer: #7a8a85;
+    --accent:        #cedc80;
+    --accent-dim:    #b8c66d;
+    --accent-strong: #9eb04d;
+    --accent-soft:   #e4ebc0;
+    --green:       #c7dccd;
+    --green-soft:  #e3eee3;
+    --blue:        #acb4c6;
+    --blue-soft:   #d6dae2;
+    --blue-deep:   #6a7590;
+    --gray:        #d1d3d1;
+    --gray-soft:   #e6e7e6;
+    --gray-softer: #f0f1f0;
+    --shadow-sm: 0 2px 8px rgba(26,46,42,.06);
+    --shadow:    0 8px 24px rgba(26,46,42,.08);
+    --shadow-lg: 0 16px 40px rgba(26,46,42,.10);
+    --shadow-accent: 0 8px 20px rgba(158,176,77,.30);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 32px; }
+
+  /* ─── Nav ─────────────────────────────────────────────── */
+  .nav {
+    position: sticky;
+    top: 16px;
+    z-index: 50;
+    margin: 16px auto 0;
+    max-width: 1240px;
+    padding: 0 20px;
+  }
+  .nav-inner {
+    background: rgba(255,255,255,.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--gray-soft);
+    border-radius: 999px;
+    padding: 12px 16px 12px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+
+.logo img {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+
+
+
+
+  .logo svg { height: 12px; width: auto; display: block; color: var(--ink); }
+  .nav-links { display: flex; gap: 28px; }
+  .nav-links a {
+    font-size: 14px;
+    color: var(--ink-soft);
+    font-weight: 500;
+    transition: color .15s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta { display: flex; gap: 8px; align-items: center; }
+  .btn-ghost {
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 10px 18px;
+    border-radius: 999px;
+    transition: background .15s;
+  }
+  .btn-ghost:hover { background: var(--gray-softer); color: var(--ink); }
+  .btn-accent {
+    background: var(--accent);
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 22px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-dim);
+    transition: transform .15s, box-shadow .15s, background .15s;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-accent:hover {
+    background: var(--accent-dim);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-accent);
+  }
+  .btn-accent svg { width: 14px; height: 14px; }
+  .btn-lg { padding: 16px 32px; font-size: 16px; }
+
+  /* ─── Hero ────────────────────────────────────────────── */
+  .hero {
+    position: relative;
+    padding: 80px 0 100px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 75% 30%, rgba(199,220,205,.6) 0%, transparent 55%),
+      radial-gradient(circle at 15% 85%, rgba(206,220,128,.25) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    color: var(--accent-strong);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+    letter-spacing: 0.02em;
+  }
+  .hero-eyebrow::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent-strong);
+    border-radius: 50%;
+  }
+  .hero h1 {
+    font-size: clamp(40px, 5.5vw, 72px);
+    line-height: 1.02;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    color: var(--ink);
+  }
+  .hero h1 .accent {
+    color: var(--accent-strong);
+    display: block;
+  }
+  .hero p.lead {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 480px;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero-meta {
+    font-size: 13px;
+    color: var(--ink-softer);
+    margin-left: 4px;
+  }
+
+  /* ─── Hero visual ────────────────────────────────────── */
+  .hero-visual {
+    position: relative;
+    height: 540px;
+  }
+  .soft-card {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--gray-soft);
+    border-radius: 20px;
+    padding: 20px 22px;
+    box-shadow: var(--shadow-lg);
+  }
+  .sc-1 { top: 0; right: 0; width: 260px; animation: float1 6s ease-in-out infinite; }
+  .sc-2 { top: 180px; left: 0; width: 280px; animation: float2 7s ease-in-out infinite; background: var(--green-soft); border-color: var(--green); }
+  .sc-3 { bottom: 0; right: 30px; width: 300px; animation: float3 8s ease-in-out infinite; background: var(--blue-soft); border-color: var(--blue); }
+  @keyframes float1 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  @keyframes float2 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(10px)} }
+  @keyframes float3 { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  .sc-label {
+    font-size: 11px;
+    color: var(--ink-softer);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .sc-value {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+    color: var(--ink);
+  }
+  .sc-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .sc-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .sc-icon svg { width: 16px; height: 16px; }
+  .sc-3 .sc-icon { background: rgba(255,255,255,.6); color: var(--blue-deep); }
+  .sc-badge {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-left: 6px;
+  }
+
+  /* Waveform */
+  .wave { display: flex; align-items: center; gap: 3px; height: 30px; margin-top: 8px; }
+  .wave span {
+    display: block; width: 3px;
+    background: var(--accent-strong);
+    border-radius: 2px;
+    animation: wave 1.2s ease-in-out infinite;
+  }
+  .wave span:nth-child(1) { height: 40%; animation-delay: 0s; }
+  .wave span:nth-child(2) { height: 70%; animation-delay: .1s; }
+  .wave span:nth-child(3) { height: 100%; animation-delay: .2s; }
+  .wave span:nth-child(4) { height: 60%; animation-delay: .3s; }
+  .wave span:nth-child(5) { height: 90%; animation-delay: .4s; }
+  .wave span:nth-child(6) { height: 50%; animation-delay: .5s; }
+  .wave span:nth-child(7) { height: 80%; animation-delay: .6s; }
+  .wave span:nth-child(8) { height: 35%; animation-delay: .7s; }
+  .wave span:nth-child(9) { height: 65%; animation-delay: .8s; }
+  .wave span:nth-child(10) { height: 45%; animation-delay: .9s; }
+  @keyframes wave { 0%,100% { transform: scaleY(0.5); } 50% { transform: scaleY(1); } }
+
+  .mini-grid {
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 6px; margin-top: 10px;
+  }
+  .mini-cell {
+    aspect-ratio: 1;
+    background: var(--surface);
+    border: 1px solid var(--gray-soft);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .mini-cell.active {
+    background: var(--accent-soft);
+    border-color: var(--accent-strong);
+  }
+
+  /* ─── Stat strip ─────────────────────────────────────── */
+  .stat-strip {
+    background: var(--surface);
+    border-top: 1px solid var(--gray-soft);
+    border-bottom: 1px solid var(--gray-soft);
+    padding: 36px 0;
+  }
+  .stat-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 32px; text-align: center; }
+  .stat-num {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent-strong);
+    margin-bottom: 4px;
+  }
+  .stat-lbl { font-size: 13px; color: var(--ink-soft); }
+
+  /* ─── Section base ─────────────────────────────────── */
+  section.block { padding: 100px 0; }
+  .sec-eyebrow {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+  .sec-eyebrow.clinical { background: var(--blue-soft); color: var(--blue-deep); }
+  .sec-title {
+    font-size: clamp(32px, 4vw, 50px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+    max-width: 760px;
+    color: var(--ink);
+  }
+  .sec-lead {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 620px;
+    margin-bottom: 56px;
+    line-height: 1.6;
+  }
+
+  /* ─── Patient section ───────────────────────────────── */
+  .patient-block { background: var(--bg-alt); position: relative; }
+
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(2,1fr); gap: 20px;
+  }
+  .feature-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid var(--gray-soft);
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow);
+    border-color: var(--accent-strong);
+  }
+  .feature-icon {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 20px;
+  }
+  .feature-icon svg { width: 22px; height: 22px; }
+  .feature-card h3 {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .feature-card p {
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .try-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 18px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent-strong);
+    transition: gap .2s;
+  }
+  .feature-card:hover .try-link { gap: 12px; }
+  .try-link svg { width: 14px; height: 14px; }
+
+  /* ─── Hospital (clinical) section ─────────────────── */
+  .hospital-block {
+    background: linear-gradient(180deg, var(--blue-soft) 0%, #c4cbd8 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .hospital-block::before {
+    content: '';
+    position: absolute;
+    top: -30%; left: 50%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(255,255,255,.4) 0%, transparent 70%);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .hospital-block .container { position: relative; z-index: 1; }
+  .hospital-block .sec-title { color: var(--ink); }
+  .hospital-block .sec-lead { color: var(--ink-soft); }
+
+  .h-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .h-card {
+    background: var(--surface);
+    border: 1px solid rgba(106,117,144,.2);
+    border-radius: 20px;
+    padding: 28px;
+    transition: transform .2s, border-color .2s;
+    box-shadow: var(--shadow-sm);
+  }
+  .h-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--blue-deep);
+    box-shadow: var(--shadow);
+  }
+  .h-card .feature-icon {
+    background: var(--blue-soft);
+    color: var(--blue-deep);
+  }
+  .h-card h3 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .h-card p {
+    font-size: 14px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+  }
+  .h-card .metric {
+    display: block;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--gray-soft);
+    font-size: 12px;
+    color: var(--accent-strong);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+  .h-card.coming-soon { opacity: .82; }
+  .h-card.coming-soon:hover { transform: none; border-color: rgba(106,117,144,.2); box-shadow: var(--shadow-sm); }
+  .roadmap-badge {
+    display: inline-block;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+    margin-left: 8px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    vertical-align: middle;
+  }
+  .roadmap-badge.live { background: var(--green-soft); color: var(--success, #6ba07a); }
+  .h-card.live {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+  }
+  .h-card.live .try-link {
+    color: var(--blue-deep);
+  }
+
+  /* ─── Demo strip ─────────────────────────────────────── */
+  .demo-strip {
+    background: var(--surface);
+    padding: 60px 0;
+    border-top: 1px solid var(--gray-soft);
+    border-bottom: 1px solid var(--gray-soft);
+  }
+  .demo-strip h3 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-strong);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .demo-links { display: grid; grid-template-columns: repeat(5,1fr); gap: 12px; }
+  .demo-link {
+    background: var(--bg-alt);
+    border: 1px solid var(--gray-soft);
+    border-radius: 14px;
+    padding: 20px 14px;
+    text-align: center;
+    transition: transform .2s, background .2s, border-color .2s;
+    color: var(--ink);
+  }
+  .demo-link:hover {
+    transform: translateY(-3px);
+    background: var(--accent-soft);
+    border-color: var(--accent-strong);
+  }
+  .demo-link-emoji { font-size: 28px; display: block; margin-bottom: 8px; }
+  .demo-link-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .demo-link-sub { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+  @media (max-width: 900px) { .demo-links { grid-template-columns: repeat(2,1fr); } }
+
+  /* ─── How it works ─────────────────────────────────── */
+  .how-block { background: var(--bg-alt); border-top: 1px solid var(--gray-soft); }
+  .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; margin-top: 20px; }
+  .step { position: relative; padding-top: 60px; }
+  .step-num {
+    position: absolute;
+    top: 0; left: 0;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--ink);
+    font-weight: 800;
+    font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--accent-dim);
+    box-shadow: var(--shadow-accent);
+  }
+  .step h3 {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .step p { font-size: 15px; color: var(--ink-soft); line-height: 1.6; }
+
+  /* ─── Final CTA ────────────────────────────────────── */
+  .final-cta {
+    padding: 120px 0;
+    text-align: center;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(199,220,205,.5) 0%, transparent 60%),
+      var(--bg);
+  }
+  .final-cta h2 {
+    font-size: clamp(36px, 5vw, 60px);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+    max-width: 800px;
+    margin-left: auto; margin-right: auto;
+    color: var(--ink);
+  }
+  .final-cta .accent { color: var(--accent-strong); }
+  .final-cta p {
+    font-size: 17px;
+    color: var(--ink-soft);
+    margin-bottom: 36px;
+    max-width: 560px;
+    margin-left: auto; margin-right: auto;
+  }
+  .final-meta { margin-top: 20px; font-size: 13px; color: var(--ink-softer); }
+
+  /* ─── Footer ─────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--gray-soft);
+    padding: 32px 0;
+    color: var(--ink-softer);
+    font-size: 13px;
+    background: var(--surface);
+  }
+  .footer-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .footer-links a { color: var(--ink-soft); transition: color .15s; }
+  .footer-links a:hover { color: var(--ink); }
+
+  /* ─── Mobile ─────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .container { padding: 0 20px; }
+    .nav-links { display: none; }
+    .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+    .hero-visual { height: 460px; margin: 0 auto; max-width: 360px; }
+    .sc-1 { width: 220px; right: 10px; }
+    .sc-2 { width: 240px; left: 10px; }
+    .sc-3 { width: 250px; right: 20px; }
+    .stat-row { grid-template-columns: repeat(2,1fr); gap: 24px; }
+    .feature-grid, .h-grid, .steps { grid-template-columns: 1fr; }
+    section.block { padding: 70px 0; }
+    .final-cta { padding: 80px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ════════════════════════════════════════════════ -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="logo" href="#" aria-label="Vela home">
+        <img src="assets/velalogo.png" alt="Vela logo" />
+    </a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#patients">For families</a>
+      <a href="#hospitals">For hospitals</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#how" class="btn-ghost">Learn more</a>
+      <a href="index.html" class="btn-accent">
+        Get started
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <div class="hero-eyebrow">Built for ALS · Available in EU</div>
+        <h1>
+          ALS takes voices.
+          <span class="accent">Vela keeps them.</span>
+        </h1>
+        <p class="lead">
+          The first platform that preserves a patient's real voice forever, lets them communicate in any way they still can, and gives clinicians the data they've never had.
+        </p>
+        <div class="hero-cta">
+          <a href="index.html" class="btn-accent btn-lg">
+            Get started
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+          <span class="hero-meta">Free · Setup in under 10 minutes</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="soft-card sc-1">
+          <div class="sc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+          </div>
+          <div class="sc-label">Voice status</div>
+          <div class="sc-value">Cloned ✓</div>
+          <div class="sc-sub">Maria's voice · preserved</div>
+          <div class="wave">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </div>
+
+        <div class="soft-card sc-2">
+          <div class="sc-label">Today's communication</div>
+          <div class="sc-value">47 messages<span class="sc-badge">+12%</span></div>
+          <div class="sc-sub">Voice mode · Spanish (Spain)</div>
+          <div class="mini-grid">
+            <div class="mini-cell">✅</div>
+            <div class="mini-cell active">💧</div>
+            <div class="mini-cell">🙏</div>
+            <div class="mini-cell active">💊</div>
+            <div class="mini-cell">😊</div>
+            <div class="mini-cell">🆘</div>
+            <div class="mini-cell">🍽️</div>
+            <div class="mini-cell">🤕</div>
+            <div class="mini-cell active">🥰</div>
+          </div>
+        </div>
+
+        <div class="soft-card sc-3">
+          <div class="sc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="sc-label">Voice biomarkers</div>
+          <div class="sc-value">Stable</div>
+          <div class="sc-sub">5 acoustic features · 12 weeks</div>
+          <svg style="margin-top:14px;width:100%;height:50px" viewBox="0 0 240 50" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="g1" x1="0" x2="0" y1="0" y2="1">
+                <stop offset="0%" stop-color="#9eb04d" stop-opacity=".5"/>
+                <stop offset="100%" stop-color="#9eb04d" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d="M 0 30 Q 30 20, 60 25 T 120 22 T 180 28 T 240 24 L 240 50 L 0 50 Z" fill="url(#g1)"/>
+            <path d="M 0 30 Q 30 20, 60 25 T 120 22 T 180 28 T 240 24" stroke="#9eb04d" stroke-width="2" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STAT STRIP ═════════════════════════════════════════ -->
+<section class="stat-strip">
+  <div class="container">
+    <div class="stat-row">
+      <div>
+        <div class="stat-num">100%</div>
+        <div class="stat-lbl">Voice preservation rate</div>
+      </div>
+      <div>
+        <div class="stat-num">8</div>
+        <div class="stat-lbl">Emotional voice modes</div>
+      </div>
+      <div>
+        <div class="stat-num">10min</div>
+        <div class="stat-lbl">Patient setup time</div>
+      </div>
+      <div>
+        <div class="stat-num">5</div>
+        <div class="stat-lbl">Acoustic biomarkers tracked</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PATIENT SECTION ════════════════════════════════════ -->
+<section class="block patient-block" id="patients">
+  <div class="container">
+    <div class="sec-eyebrow">For patients & families</div>
+    <h2 class="sec-title">Your voice. Your words. Your way of speaking.</h2>
+    <p class="sec-lead">
+      Vela preserves the way you sound, the way you joke, the way you say "I love you" — and keeps it available even when speaking becomes impossible.
+    </p>
+
+    <div class="feature-grid">
+      <a class="feature-card" href="voicebank.html">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </div>
+        <h3>Voice cloning that lasts forever</h3>
+        <p>Record your voice while you still have it — even from old WhatsApp messages. Vela's AI clones it so every future message sounds like you, not a robot.</p>
+        <span class="try-link">Try voice bank <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+
+      <a class="feature-card" href="communicate.html">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Eyes, voice, touch — whichever works</h3>
+        <p>Speak, type, tap pictograms, or just look at the screen. Vela adapts as the disease progresses — patients never have to learn a new app.</p>
+        <span class="try-link">Try communicate <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+
+      <a class="feature-card" href="listen.html">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <h3>An AI partner that listens for you</h3>
+        <p>Vela's Listen Mode hears the conversation around the patient and suggests 3 responses in their cloned voice. One tap — and they're back in the conversation.</p>
+        <span class="try-link">Try Listen Mode <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+
+      <a class="feature-card" href="eyetrack.html">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <h3>Eye tracking for late-stage patients</h3>
+        <p>When fingers no longer work, eyes still do. Vela's webcam-based eye tracking lets patients select pictograms and speak — no special hardware needed.</p>
+        <span class="try-link">Try eye tracking <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOSPITAL SECTION ═══════════════════════════════════ -->
+<section class="block hospital-block" id="hospitals">
+  <div class="container">
+    <div class="sec-eyebrow clinical">For hospitals & clinicians</div>
+    <h2 class="sec-title">The data you've never had on ALS patients.</h2>
+    <p class="sec-lead">
+      ALS progression is currently tracked through subjective monthly interviews. Vela captures continuous clinical-grade data from every interaction — so doctors see decline before it becomes a crisis.
+    </p>
+
+    <div class="h-grid">
+      <div class="h-card coming-soon">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Acoustic voice biomarkers <span class="roadmap-badge">Roadmap Q3</span></h3>
+        <p>Five clinically validated acoustic features — jitter, shimmer, harmonics-to-noise ratio, speech rate, phonation time — tracked continuously from every patient message.</p>
+        <span class="metric">Detects decline weeks before clinical interview</span>
+      </div>
+
+      <div class="h-card coming-soon">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        </div>
+        <h3>Respiratory early warning <span class="roadmap-badge">Roadmap Q3</span></h3>
+        <p>Maximum phonation time, breathiness patterns, and speech rate combine into a respiratory risk score. Clinicians get alerts before respiratory failure becomes emergency.</p>
+        <span class="metric">Earlier intervention extends life expectancy 6–18 months</span>
+      </div>
+
+      <a class="h-card live" href="caregiver.html">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3>Caregiver portal &amp; reports <span class="roadmap-badge live">Live</span></h3>
+        <p>PIN-protected portal with consolidated patient reports — communication patterns, emotional trends, voice health, and risk indicators in one view.</p>
+        <span class="try-link">Open portal <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+      </a>
+
+      <div class="h-card coming-soon">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        </div>
+        <h3>Auto-generated clinical PDFs <span class="roadmap-badge">Roadmap Q3</span></h3>
+        <p>Monthly PDF reports patients bring to neurology appointments. Voice trends, communication patterns, mood indicators, sleep markers — ready before the doctor walks in.</p>
+        <span class="metric">Saves 15–20 min per clinic appointment</span>
+      </div>
+
+      <div class="h-card coming-soon">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        </div>
+        <h3>Multi-patient cohort dashboard <span class="roadmap-badge">Roadmap Q4</span></h3>
+        <p>One clinician dashboard for 50–200 ALS patients. Sort by risk score, deterioration rate, caregiver alerts. Daily triage in under 5 minutes.</p>
+        <span class="metric">Built for ALS clinic workflows, not generic EMR</span>
+      </div>
+
+      <div class="h-card coming-soon">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Longitudinal patient timeline <span class="roadmap-badge">Roadmap Q4</span></h3>
+        <p>Every patient's full disease journey in one timeline — voice samples from day one, interventions, milestones, decline rate. Clinical research dataset that compounds in value.</p>
+        <span class="metric">Defensible data moat for ALS research</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ DEMO STRIP ═════════════════════════════════════════ -->
+<section class="demo-strip">
+  <div class="container">
+    <h3>Try every demo · No setup required</h3>
+    <div class="demo-links">
+      <a class="demo-link" href="voicebank.html">
+        <span class="demo-link-emoji">🎙️</span>
+        <span class="demo-link-label">Voice Bank</span>
+        <div class="demo-link-sub">Clone a voice</div>
+      </a>
+      <a class="demo-link" href="communicate.html">
+        <span class="demo-link-emoji">💬</span>
+        <span class="demo-link-label">Communicate</span>
+        <div class="demo-link-sub">Voice + emotion</div>
+      </a>
+      <a class="demo-link" href="listen.html">
+        <span class="demo-link-emoji">👂</span>
+        <span class="demo-link-label">Listen Mode</span>
+        <div class="demo-link-sub">AI partner</div>
+      </a>
+      <a class="demo-link" href="eyetrack.html">
+        <span class="demo-link-emoji">👁️</span>
+        <span class="demo-link-label">Eye Tracking</span>
+        <div class="demo-link-sub">Webcam-based</div>
+      </a>
+      <a class="demo-link" href="caregiver.html">
+        <span class="demo-link-emoji">🩺</span>
+        <span class="demo-link-label">Caregiver</span>
+        <div class="demo-link-sub">Reports + portal</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══════════════════════════════════════ -->
+<section class="block how-block" id="how">
+  <div class="container">
+    <div class="sec-eyebrow">How it works</div>
+    <h2 class="sec-title">Three steps. Then Vela works in the background, forever.</h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Record the voice</h3>
+        <p>Patient records 30–60 seconds of natural speech. Or upload old WhatsApp messages, voicemails, family videos. Vela's AI extracts and clones the voice.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Vela learns the personality</h3>
+        <p>Region, dialect, slang, humour, energy level. Every message gets rewritten to sound like the patient — not a generic AI voice with their accent on top.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Patient communicates, clinicians watch</h3>
+        <p>Patient uses voice, eyes, touch — whatever works. Every interaction generates clinical data. Caregivers stay informed. Doctors get reports without lifting a finger.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FINAL CTA ══════════════════════════════════════════ -->
+<section class="final-cta">
+  <div class="container">
+    <h2>The voice doesn't have to go.<br><span class="accent">It just needs the right place to live.</span></h2>
+    <p>Try Vela free. Setup takes under 10 minutes. No card required.</p>
+    <a href="index.html" class="btn-accent btn-lg">
+      Get started
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <div class="final-meta">Spanish · English · French · More coming</div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═════════════════════════════════════════════ -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <a class="logo" href="#" aria-label="Vela home">
+        <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+          <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+            <path d="M 0 4 Q 12 14, 0 24"/>
+            <path d="M 8 4 Q 20 14, 8 24"/>
+            <path d="M 16 4 Q 28 14, 16 24"/>
+          </g>
+        </svg>
+      </a>
+      <div class="footer-links">
+        <a href="voicebank.html">Voice Bank</a>
+        <a href="communicate.html">Communicate</a>
+        <a href="listen.html">Listen Mode</a>
+        <a href="eyetrack.html">Eye Track</a>
+        <a href="caregiver.html">Caregiver</a>
+        <a href="settings.html">Settings</a>
+      </div>
+      <div>© 2026 Vela · Built for ALS patients</div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

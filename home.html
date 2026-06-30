@@ -1,147 +1,120 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Home — Vela</title>
-  <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home — Vela</title>
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div class="page">
 
-  <!-- Header -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
-  <div style="display:flex;align-items:center;gap:12px">
-    
-    <div>
-      <h1 id="greeting" style="margin-bottom:2px;font-size:24px">Hello</h1>
-      <div id="date-line" style="font-size:13px;color:var(--muted)"></div>
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title" id="welcome-line">Welcome back</span>
+    <div class="topnav-actions">
+      <a href="settings.html" class="btn btn-ghost" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </a>
     </div>
   </div>
-  <a href="settings.html"
-    style="background:var(--light);border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;color:var(--blue);text-decoration:none;font-weight:500">
-    ⚙ Settings
-  </a>
-</div>
+</nav>
 
-  <!-- Voice card -->
-  <div class="voice-card" id="voice-card" style="cursor:pointer" onclick="window.location.href='voicebank.html'">
-    <div style="display:flex;justify-content:space-between;align-items:center">
+<div class="page page-wide">
+
+  <div style="margin-bottom:24px">
+    <div class="badge badge-lime mb-2">Vela hub</div>
+    <h1 id="welcome-heading">Hello, friend</h1>
+    <p class="page-subtitle" id="welcome-sub">What would you like to do today?</p>
+  </div>
+
+  <!-- Status strip -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="row-between" style="flex-wrap:wrap;gap:14px">
+      <div class="row" style="gap:14px">
+        <span class="status-dot live"></span>
+        <div>
+          <div style="font-size:13px;color:var(--soft)">Active voice</div>
+          <div style="font-size:15px;font-weight:600" id="active-voice-name">Browser default</div>
+        </div>
+      </div>
       <div>
-        <div class="voice-card-name" id="voice-card-name">
-          No voice cloned yet
-        </div>
-        <div class="voice-card-sub" id="voice-card-sub">
-          Tap to open Voice Bank
-        </div>
+        <div style="font-size:13px;color:var(--soft)">Stage</div>
+        <div style="font-size:15px;font-weight:600" id="stage-label">Stage 1</div>
       </div>
-      <div id="voice-status-icon" style="font-size:28px">🎤</div>
-    </div>
-  </div>
-
-  <!-- Mode card -->
-  <div id="mode-voice" style="display:none">
-    <div class="card" style="border-left:4px solid var(--navy)">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Active mode</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy)">Voice</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px">Speak → Vela speaks in your voice</div>
-        </div>
-        <div style="font-size:36px">🗣️</div>
+      <div>
+        <div style="font-size:13px;color:var(--soft)">Today's messages</div>
+        <div style="font-size:15px;font-weight:600" id="msg-count">0</div>
       </div>
     </div>
-    <button class="btn-primary" onclick="window.location.href='communicate.html'">
-      Start Speaking →
-    </button>
   </div>
 
-  <div id="mode-text" style="display:none">
-    <div class="card" style="border-left:4px solid var(--navy)">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Active mode</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy)">Text</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px">Type → Vela speaks in your voice</div>
-        </div>
-        <div style="font-size:36px">⌨️</div>
-      </div>
-    </div>
-    <button class="btn-primary" onclick="window.location.href='communicate.html'">
-      Start Typing →
-    </button>
-  </div>
+  <!-- Feature hub -->
+  <div class="hub-grid">
 
-  <div id="mode-eye" style="display:none">
-    <div class="card" style="border-left:4px solid var(--teal)">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Active mode</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy)">Eye Tracking</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px">Look at pictures → Vela speaks</div>
-        </div>
-        <div style="font-size:36px">👁️</div>
-      </div>
-    </div>
-    <button class="btn-primary" onclick="window.location.href='eyetrack.html'">
-      Start Eye Tracking →
-    </button>
-  </div>
+    <a class="hub-card" href="communicate.html">
+      <span class="hub-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </span>
+      <div class="hub-icon">💬</div>
+      <div class="hub-title">Communicate</div>
+      <div class="hub-desc">Voice, type or tap pictograms. 8 emotional tones to choose from.</div>
+    </a>
 
-  <div id="mode-touch" style="display:none">
-    <div class="card" style="border-left:4px solid var(--navy)">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:12px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Active mode</div>
-          <div style="font-size:20px;font-weight:700;color:var(--navy)">Pictograms</div>
-          <div style="font-size:13px;color:var(--muted);margin-top:2px">Tap pictures → Vela speaks</div>
-        </div>
-        <div style="font-size:36px">👆</div>
-      </div>
-    </div>
-    <button class="btn-primary" onclick="window.location.href='communicate.html'">
-      Start Communicating →
-    </button>
-  </div>
+    <a class="hub-card" href="listen.html">
+      <span class="hub-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </span>
+      <div class="hub-icon">👂</div>
+      <div class="hub-title">Listen mode <span class="badge badge-lime" style="margin-left:6px;font-size:9px">NEW</span></div>
+      <div class="hub-desc">Vela listens to the conversation and suggests 3 ready-to-speak responses.</div>
+    </a>
 
-  <!-- Voice switcher -->
-  <div id="voice-switcher" style="display:none;margin-top:16px">
-    <h3>Switch patient voice</h3>
-    <div id="voice-switch-list"></div>
-  </div>
+    <a class="hub-card" href="voicebank.html">
+      <span class="hub-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </span>
+      <div class="hub-icon">🎙️</div>
+      <div class="hub-title">Voice bank</div>
+      <div class="hub-desc">Clone your voice from a recording or upload old audio. Preserve it forever.</div>
+    </a>
 
-  <!-- Recent phrases -->
-  <div id="recent-section" style="display:none;margin-top:16px">
-    <h3>Recent phrases</h3>
-    <div id="recent-list"></div>
-  </div>
+    <a class="hub-card" href="eyetrack.html">
+      <span class="hub-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </span>
+      <div class="hub-icon">👁️</div>
+      <div class="hub-title">Eye tracking</div>
+      <div class="hub-desc">Communicate using only your eyes. Webcam-based, no special hardware.</div>
+    </a>
 
-  <!-- Nav -->
-  <div class="nav-grid" style="margin-top:20px">
-    <button class="nav-btn" onclick="window.location.href='communicate.html'">
-      <span class="nav-btn-icon">💬</span>
-      <span class="nav-btn-label">Communicate</span>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='eyetrack.html'">
-      <span class="nav-btn-icon">👁️</span>
-      <span class="nav-btn-label">Eye tracking</span>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='voicebank.html'">
-      <span class="nav-btn-icon">🎤</span>
-      <span class="nav-btn-label">Voice bank</span>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='caregiver.html'">
-      <span class="nav-btn-icon">👤</span>
-      <span class="nav-btn-label">Caregiver</span>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='settings.html'">
-      <span class="nav-btn-icon">⚙️</span>
-      <span class="nav-btn-label">Settings</span>
-    </button>
-    <button class="nav-btn" onclick="window.location.href='index.html'">
-      <span class="nav-btn-icon">➕</span>
-      <span class="nav-btn-label">New user</span>
-    </button>
+    <a class="hub-card" href="caregiver.html">
+      <span class="hub-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </span>
+      <div class="hub-icon clinical">🩺</div>
+      <div class="hub-title">Caregiver portal</div>
+      <div class="hub-desc">PIN-protected — patient reports, voices, phrases, daily summary.</div>
+    </a>
+
+    <a class="hub-card" href="settings.html">
+      <span class="hub-arrow">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:16px;height:16px"><path d="M7 17L17 7M7 7h10v10"/></svg>
+      </span>
+      <div class="hub-icon">⚙️</div>
+      <div class="hub-title">Settings</div>
+      <div class="hub-desc">Profile, stage, language, data export, and accessibility options.</div>
+    </a>
+
   </div>
 
 </div>
@@ -149,85 +122,27 @@
 <script src="js/app.js"></script>
 <script>
 window.addEventListener('DOMContentLoaded', () => {
+  // Redirect if no consent
+  try {
+    const consent = JSON.parse(localStorage.getItem('vela_consent') || '{}');
+    if (!consent.accepted) { location.href = 'index.html'; return; }
+  } catch { location.href = 'index.html'; return; }
+
   const p = getProfile();
+  if (!p.name) { location.href = 'setup.html'; return; }
 
-  // Greeting
-  document.getElementById('greeting').textContent =
-    'Hello, ' + (p.name || 'there') + ' 👋';
-  document.getElementById('date-line').textContent =
-    new Date().toLocaleDateString('en-IE', {
-      weekday:'long', day:'numeric', month:'long'
-    });
+  document.getElementById('welcome-heading').textContent = `Hello, ${p.name}`;
+  document.getElementById('welcome-line').textContent = `Welcome back, ${p.name}`;
+  document.getElementById('stage-label').textContent = `Stage ${p.stage || 1}`;
 
-  // Voice card
-  const vc   = document.getElementById('voice-card');
-  const vcn  = document.getElementById('voice-card-name');
-  const vcs  = document.getElementById('voice-card-sub');
-  const vci  = document.getElementById('voice-status-icon');
+  const voice = getActiveVoice();
+  document.getElementById('active-voice-name').textContent = voice ? voice.voiceName : 'Browser default';
 
-  if (p.voiceId) {
-    vcn.textContent  = p.voiceName || 'Cloned voice active';
-    vcs.textContent  = 'All messages speak in your voice · Tap to manage';
-    vci.textContent  = '✅';
-    vc.style.background =
-      'linear-gradient(135deg, #064e3b 0%, #0d9488 100%)';
-  }
-
-  // Mode
-  const mode = p.mode || 'touch';
-  const el   = document.getElementById('mode-' + mode);
-  if (el) el.style.display = 'block';
-
-  // Voice switcher
- /*  const voices = JSON.parse(
-    localStorage.getItem('vela_voice_bank') || '[]'
-  );
-  if (voices.length > 1) {
-    document.getElementById('voice-switcher').style.display = 'block';
-    const list = document.getElementById('voice-switch-list');
-    voices.forEach((v, i) => {
-      const isActive = p.voiceId === v.voiceId;
-      const btn = document.createElement('div');
-      btn.style.cssText = `
-        display:flex;justify-content:space-between;align-items:center;
-        padding:12px 16px;border-radius:10px;margin-bottom:8px;
-        border:2px solid ${isActive ? 'var(--navy)' : 'var(--border)'};
-        background:${isActive ? '#eef4ff' : 'var(--surface)'};
-        cursor:pointer;transition:all .15s`;
-      btn.innerHTML = `
-        <div>
-          <div style="font-size:14px;font-weight:600;color:var(--navy)">${v.name}</div>
-          <div style="font-size:11px;color:var(--muted)">
-            Added ${new Date(v.addedAt).toLocaleDateString()}
-          </div>
-        </div>
-        <span class="badge ${isActive ? 'badge-blue' : 'badge-green'}">
-          ${isActive ? 'Active' : 'Use'}
-        </span>`;
-      btn.onclick = () => {
-        const prof = getProfile();
-        prof.voiceId   = v.voiceId;
-        prof.voiceName = v.voiceName;
-        saveProfile(prof);
-        location.reload();
-      };
-      list.appendChild(btn);
-    });
-  }
- */
-  // Recent phrases
+  // Today's message count
   const history = getHistory();
-  if (history.length > 0) {
-    document.getElementById('recent-section').style.display = 'block';
-    const list = document.getElementById('recent-list');
-    history.slice(0, 4).forEach(item => {
-      const div = document.createElement('div');
-      div.className   = 'history-item';
-      div.textContent = item.text;
-      div.onclick     = () => rewriteAndSpeak(item.text);
-      list.appendChild(div);
-    });
-  }
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayCount = history.filter(h => h.at >= today.getTime()).length;
+  document.getElementById('msg-count').textContent = todayCount;
 });
 </script>
 </body>

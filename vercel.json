@@ -1,6 +1,11 @@
 {
   "version": 2,
   "functions": {
-    "api/*.js": { "maxDuration": 30 }
-  }
+    "api/*.js": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/landing.html" }
+  ]
 }

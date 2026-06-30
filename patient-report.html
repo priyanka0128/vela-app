@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Patient Report — Vela Caregiver</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+  /* Report-specific layout */
+  .report-meta {
+    background: var(--surface);
+    border: 1px solid var(--gray-soft);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .meta-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 16px; }
+  .meta-cell-label { font-size: 11px; color: var(--ink-softer); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+  .meta-cell-value { font-size: 16px; font-weight: 600; color: var(--ink); margin-top: 4px; }
+
+  .report-section {
+    background: var(--surface);
+    border: 1px solid var(--gray-soft);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .report-section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.015em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .report-section h2 .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .report-section .h-sub { font-size: 13px; color: var(--ink-soft); margin-bottom: 20px; }
+
+  /* Stat tiles */
+  .stat-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .stat-tile {
+    background: var(--bg-alt);
+    border: 1px solid var(--gray-soft);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .stat-tile .v { font-size: 28px; font-weight: 700; color: var(--accent-strong); letter-spacing: -0.02em; }
+  .stat-tile .v.blue { color: var(--blue-deep); }
+  .stat-tile .v.warn { color: var(--warning); }
+  .stat-tile .v.danger { color: var(--danger); }
+  .stat-tile .l { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+  .stat-tile .trend { font-size: 11px; font-weight: 600; margin-top: 4px; }
+  .stat-tile .trend.up { color: var(--success); }
+  .stat-tile .trend.down { color: var(--danger); }
+
+  /* Bar chart */
+  .bar-chart { display: flex; align-items: flex-end; gap: 6px; height: 130px; padding: 0 4px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .bar {
+    width: 100%;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-strong) 100%);
+    border-radius: 6px 6px 0 0;
+    min-height: 4px;
+    transition: opacity .2s;
+  }
+  .bar:hover { opacity: .8; }
+  .bar-label { font-size: 10px; color: var(--ink-softer); }
+
+  /* Donut chart */
+  .donut-wrap { display: flex; gap: 24px; align-items: center; flex-wrap: wrap; }
+  .donut-svg { flex-shrink: 0; }
+  .donut-legend { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 200px; }
+  .legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; }
+  .legend-name { color: var(--ink); font-weight: 500; flex: 1; }
+  .legend-value { color: var(--ink-soft); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Top list */
+  .top-list { display: flex; flex-direction: column; gap: 6px; }
+  .top-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-alt);
+    border: 1px solid var(--gray-soft);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+  .top-rank {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .top-text { flex: 1; font-size: 14px; color: var(--ink); }
+  .top-count { font-size: 12px; color: var(--ink-soft); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Risk indicators */
+  .risk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .risk-item {
+    background: var(--bg-alt);
+    border: 1px solid var(--gray-soft);
+    border-left: 4px solid var(--success);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .risk-item.warn { border-left-color: var(--warning); background: #faf6ed; }
+  .risk-item.danger { border-left-color: var(--danger); background: #faedeb; }
+  .risk-label { font-size: 12px; color: var(--ink-soft); margin-bottom: 4px; font-weight: 500; }
+  .risk-value { font-size: 18px; font-weight: 700; color: var(--ink); }
+  .risk-note { font-size: 11px; color: var(--ink-softer); margin-top: 6px; }
+
+  /* Action toolbar */
+  .toolbar {
+    display: flex; gap: 8px; align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--gray-soft);
+    border-radius: 999px;
+    padding: 8px 8px 8px 18px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
+  }
+  .toolbar select.range-select {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 28px 6px 4px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a2e2a' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 6px center;
+    background-size: 14px;
+  }
+  .toolbar select.range-select:focus { outline: none; }
+  .toolbar-actions { margin-left: auto; display: flex; gap: 6px; }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--ink-softer);
+    font-size: 14px;
+  }
+
+  /* Print */
+  @media print {
+    body { background: white !important; }
+    body::before, .topnav, .toolbar, #vela-home-link, #offline-banner { display: none !important; }
+    .page { padding: 0 !important; max-width: 100% !important; }
+    .report-section, .report-meta { box-shadow: none !important; border: 1px solid #ccc !important; break-inside: avoid; }
+    .stat-tile, .risk-item, .top-row { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title">Patient report</span>
+    <div class="topnav-actions">
+      <a href="caregiver.html" class="btn btn-ghost">← Caregiver</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page page-wide">
+
+  <div class="badge badge-blue mb-2">Caregiver report</div>
+  <h1>Patient communication summary</h1>
+  <p class="page-subtitle">A consolidated view of how the patient is communicating, feeling, and progressing.</p>
+
+  <!-- Time range toolbar -->
+  <div class="toolbar">
+    <span class="text-sm text-soft">Showing data for:</span>
+    <select class="range-select" id="range-select" onchange="rerender()">
+      <option value="7">Last 7 days</option>
+      <option value="30" selected>Last 30 days</option>
+      <option value="90">Last 90 days</option>
+      <option value="365">Last year</option>
+      <option value="9999">All time</option>
+    </select>
+    <div class="toolbar-actions">
+      <button class="btn btn-secondary" onclick="window.print()">📄 Print / Save PDF</button>
+      <button class="btn btn-clinical" onclick="exportReport()">📊 Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Patient meta -->
+  <div class="report-meta">
+    <div class="meta-row">
+      <div>
+        <div class="meta-cell-label">Patient</div>
+        <div class="meta-cell-value" id="p-name">—</div>
+      </div>
+      <div>
+        <div class="meta-cell-label">Stage</div>
+        <div class="meta-cell-value" id="p-stage">—</div>
+      </div>
+      <div>
+        <div class="meta-cell-label">Region</div>
+        <div class="meta-cell-value" id="p-region">—</div>
+      </div>
+      <div>
+        <div class="meta-cell-label">Language</div>
+        <div class="meta-cell-value" id="p-language">—</div>
+      </div>
+      <div>
+        <div class="meta-cell-label">Days on Vela</div>
+        <div class="meta-cell-value" id="p-days">—</div>
+      </div>
+      <div>
+        <div class="meta-cell-label">Report generated</div>
+        <div class="meta-cell-value" id="p-generated">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 1: Communication activity -->
+  <div class="report-section">
+    <h2><span class="icon">💬</span> Communication activity</h2>
+    <p class="h-sub">Total messages sent through Vela in the selected period.</p>
+
+    <div class="stat-tiles">
+      <div class="stat-tile">
+        <div class="v" id="s-total">0</div>
+        <div class="l">Total messages</div>
+        <div class="trend up" id="s-total-trend"></div>
+      </div>
+      <div class="stat-tile">
+        <div class="v" id="s-daily">0</div>
+        <div class="l">Daily average</div>
+      </div>
+      <div class="stat-tile">
+        <div class="v blue" id="s-active-hour">—</div>
+        <div class="l">Most active hour</div>
+      </div>
+      <div class="stat-tile">
+        <div class="v blue" id="s-quiet-days">0</div>
+        <div class="l">Days without messages</div>
+      </div>
+    </div>
+
+    <div class="h-sub" style="margin-top:10px;margin-bottom:8px"><strong>Messages per day</strong></div>
+    <div class="bar-chart" id="bar-daily"></div>
+  </div>
+
+  <!-- Section 2: Emotional patterns -->
+  <div class="report-section">
+    <h2><span class="icon">💭</span> Emotional patterns</h2>
+    <p class="h-sub">Distribution of emotional tones used when speaking. A sustained increase in sad or urgent tones may indicate concern.</p>
+
+    <div class="donut-wrap">
+      <svg class="donut-svg" id="donut" viewBox="0 0 140 140" width="140" height="140"></svg>
+      <div class="donut-legend" id="emo-legend"></div>
+    </div>
+  </div>
+
+  <!-- Section 3: Voice health -->
+  <div class="report-section">
+    <h2><span class="icon">🎙️</span> Voice health</h2>
+    <p class="h-sub">Voice samples preserved and currently in use. More samples = more authentic emotional range.</p>
+
+    <div class="stat-tiles">
+      <div class="stat-tile">
+        <div class="v" id="v-count">0</div>
+        <div class="l">Voice samples cloned</div>
+      </div>
+      <div class="stat-tile">
+        <div class="v blue" id="v-active">—</div>
+        <div class="l">Active voice</div>
+      </div>
+      <div class="stat-tile">
+        <div class="v" id="v-last">—</div>
+        <div class="l">Days since last sample</div>
+      </div>
+    </div>
+
+    <div id="voice-timeline" style="margin-top:8px"></div>
+  </div>
+
+  <!-- Section 4: Top phrases -->
+  <div class="report-section">
+    <h2><span class="icon">📋</span> Most-spoken phrases</h2>
+    <p class="h-sub">What the patient says most often. Useful for spotting evolving needs or recurring concerns.</p>
+
+    <div class="top-list" id="top-phrases"></div>
+  </div>
+
+  <!-- Section 5: Risk indicators (clinical-feeling) -->
+  <div class="report-section">
+    <h2><span class="icon">⚠️</span> Risk &amp; wellbeing indicators</h2>
+    <p class="h-sub">Signals that may warrant attention from caregiver or clinician. These are informational, not diagnostic.</p>
+
+    <div class="risk-grid" id="risk-grid"></div>
+  </div>
+
+  <!-- Section 6: Roadmap note -->
+  <div class="report-section card-clinical">
+    <h2 style="color:var(--blue-deep)"><span class="icon" style="background:rgba(255,255,255,.6);color:var(--blue-deep)">📈</span> Coming in Q3: clinical-grade biomarkers</h2>
+    <p class="h-sub" style="color:var(--ink)">This report will be extended with acoustic voice biomarkers (jitter, shimmer, harmonics-to-noise ratio, speech rate, maximum phonation time), respiratory risk scoring, and caregiver burden index — automatically generated as PDFs for monthly neurology appointments.</p>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script>
+const EMO_COLORS = {
+  neutral: '#7a8a85',
+  happy:   '#cedc80',
+  sad:     '#acb4c6',
+  calm:    '#c7dccd',
+  urgent:  '#c0625a',
+  gentle:  '#e4ebc0',
+  excited: '#9eb04d',
+  tender:  '#d6dae2'
+};
+const EMO_LABELS = {
+  neutral: 'Neutral', happy: 'Happy', sad: 'Sad', calm: 'Calm',
+  urgent: 'Urgent', gentle: 'Gentle', excited: 'Excited', tender: 'Tender'
+};
+const REGION_LABELS = {
+  'spain':'Spain — Madrid','spain-andalucia':'Spain — Andalucía','spain-catalonia':'Spain — Catalonia',
+  'mexico':'Mexico','argentina':'Argentina','colombia':'Colombia','cuba':'Cuba',
+  'uk':'United Kingdom','ireland':'Ireland','us':'United States',
+  'france':'France','canada-fr':'Canada (Québec)'
+};
+const LANG_LABELS = { es: 'Spanish', en: 'English', fr: 'French' };
+
+function getRangeMs() {
+  const days = +document.getElementById('range-select').value;
+  return Date.now() - days * 24 * 3600 * 1000;
+}
+
+function renderMeta() {
+  const p = getProfile();
+  document.getElementById('p-name').textContent = p.name || 'Unknown';
+  document.getElementById('p-stage').textContent = `Stage ${p.stage || 1}`;
+  document.getElementById('p-region').textContent = REGION_LABELS[p.region] || p.region || '—';
+  document.getElementById('p-language').textContent = LANG_LABELS[p.language] || p.language || '—';
+  if (p.createdAt) {
+    const days = Math.floor((Date.now() - p.createdAt) / (24 * 3600 * 1000));
+    document.getElementById('p-days').textContent = days;
+  } else {
+    document.getElementById('p-days').textContent = '—';
+  }
+  document.getElementById('p-generated').textContent = new Date().toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+}
+
+function renderActivity() {
+  const since = getRangeMs();
+  const history = getHistory().filter(h => h.at >= since);
+
+  document.getElementById('s-total').textContent = history.length;
+
+  const days = Math.max(1, (Date.now() - since) / (24 * 3600 * 1000));
+  document.getElementById('s-daily').textContent = (history.length / days).toFixed(1);
+
+  // Hour histogram
+  const hourCounts = Array(24).fill(0);
+  history.forEach(h => hourCounts[new Date(h.at).getHours()]++);
+  const peakHour = hourCounts.indexOf(Math.max(...hourCounts));
+  document.getElementById('s-active-hour').textContent = history.length ? `${peakHour}:00` : '—';
+
+  // Bar chart - last 14 days max for readability
+  const showDays = Math.min(14, Math.ceil(days));
+  const dayCounts = [];
+  const dayLabels = [];
+  for (let i = showDays - 1; i >= 0; i--) {
+    const d = new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate() - i);
+    const next = d.getTime() + 24 * 3600 * 1000;
+    const count = history.filter(h => h.at >= d.getTime() && h.at < next).length;
+    dayCounts.push(count);
+    dayLabels.push(d.getDate());
+  }
+  const max = Math.max(1, ...dayCounts);
+  const quietDays = dayCounts.filter(c => c === 0).length;
+  document.getElementById('s-quiet-days').textContent = quietDays;
+
+  const chart = document.getElementById('bar-daily');
+  chart.innerHTML = dayCounts.map((c, i) => `
+    <div class="bar-col">
+      <div class="bar" style="height:${(c/max)*100}%" title="${c} messages"></div>
+      <div class="bar-label">${dayLabels[i]}</div>
+    </div>
+  `).join('');
+
+  // Trend vs previous period
+  const prevSince = since - (Date.now() - since);
+  const prevCount = getHistory().filter(h => h.at >= prevSince && h.at < since).length;
+  const trendEl = document.getElementById('s-total-trend');
+  if (prevCount > 0) {
+    const change = ((history.length - prevCount) / prevCount * 100).toFixed(0);
+    const arrow = change > 0 ? '↑' : change < 0 ? '↓' : '→';
+    trendEl.textContent = `${arrow} ${Math.abs(change)}% vs previous period`;
+    trendEl.className = 'trend ' + (change > 0 ? 'up' : 'down');
+  } else {
+    trendEl.textContent = '';
+  }
+}
+
+function renderEmotions() {
+  const since = getRangeMs();
+  const history = getHistory().filter(h => h.at >= since);
+  const counts = {};
+  history.forEach(h => { counts[h.emotion || 'neutral'] = (counts[h.emotion || 'neutral'] || 0) + 1; });
+  const total = history.length;
+
+  const donut = document.getElementById('donut');
+  const legend = document.getElementById('emo-legend');
+
+  if (!total) {
+    donut.innerHTML = '<circle cx="70" cy="70" r="55" fill="none" stroke="#e6e7e6" stroke-width="20"/>';
+    legend.innerHTML = '<div class="empty">No messages in this period</div>';
+    return;
+  }
+
+  // SVG donut using stroke-dasharray
+  const r = 55, c = 2 * Math.PI * r;
+  let offset = 0;
+  const entries = Object.entries(counts).sort((a,b) => b[1] - a[1]);
+  let svgParts = ['<circle cx="70" cy="70" r="55" fill="none" stroke="#e6e7e6" stroke-width="20"/>'];
+
+  entries.forEach(([emo, count]) => {
+    const pct = count / total;
+    const dash = pct * c;
+    svgParts.push(`<circle cx="70" cy="70" r="55" fill="none"
+      stroke="${EMO_COLORS[emo] || '#7a8a85'}" stroke-width="20"
+      stroke-dasharray="${dash} ${c}"
+      stroke-dashoffset="${-offset}"
+      transform="rotate(-90 70 70)"/>`);
+    offset += dash;
+  });
+  svgParts.push(`<text x="70" y="74" text-anchor="middle" font-family="Inter" font-weight="700" font-size="20" fill="#1a2e2a">${total}</text>`);
+  svgParts.push(`<text x="70" y="92" text-anchor="middle" font-family="Inter" font-weight="500" font-size="10" fill="#7a8a85">messages</text>`);
+  donut.innerHTML = svgParts.join('');
+
+  legend.innerHTML = entries.map(([emo, count]) => {
+    const pct = (count/total*100).toFixed(0);
+    return `<div class="legend-row">
+      <span class="legend-swatch" style="background:${EMO_COLORS[emo] || '#7a8a85'}"></span>
+      <span class="legend-name">${EMO_LABELS[emo] || emo}</span>
+      <span class="legend-value">${count} · ${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+function renderVoiceHealth() {
+  const voices = getUserVoices();
+  document.getElementById('v-count').textContent = voices.length;
+
+  const active = voices.find(v => v.active);
+  document.getElementById('v-active').textContent = active ? active.voiceName : 'Browser default';
+
+  if (voices.length) {
+    const latest = Math.max(...voices.map(v => v.createdAt || 0));
+    const days = Math.floor((Date.now() - latest) / (24 * 3600 * 1000));
+    document.getElementById('v-last').textContent = days;
+  } else {
+    document.getElementById('v-last').textContent = '—';
+  }
+
+  // Timeline
+  const tl = document.getElementById('voice-timeline');
+  if (!voices.length) {
+    tl.innerHTML = '<div class="empty">No voice samples yet. Record one in Voice Bank.</div>';
+    return;
+  }
+  const sorted = [...voices].sort((a,b) => (a.createdAt||0) - (b.createdAt||0));
+  tl.innerHTML = '<div class="h-sub" style="margin-top:14px;margin-bottom:8px"><strong>Sample timeline</strong></div>' +
+    sorted.map(v => `
+      <div class="top-row">
+        <div class="top-rank" style="background:${v.active ? 'var(--accent-soft)' : 'var(--gray-soft)'};color:${v.active ? 'var(--accent-strong)' : 'var(--ink-soft)'}">${v.active ? '★' : '·'}</div>
+        <div class="top-text">${v.voiceName}</div>
+        <div class="top-count">${new Date(v.createdAt).toLocaleDateString()}</div>
+      </div>
+    `).join('');
+}
+
+function renderTopPhrases() {
+  const since = getRangeMs();
+  const history = getHistory().filter(h => h.at >= since);
+  const counts = {};
+  history.forEach(h => {
+    const t = (h.text || '').trim();
+    if (t) counts[t] = (counts[t] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1]).slice(0, 8);
+  const list = document.getElementById('top-phrases');
+  if (!sorted.length) {
+    list.innerHTML = '<div class="empty">No phrases recorded in this period</div>';
+    return;
+  }
+  list.innerHTML = sorted.map(([text, count], i) => `
+    <div class="top-row">
+      <div class="top-rank">${i+1}</div>
+      <div class="top-text">"${text.length > 80 ? text.slice(0, 80) + '…' : text}"</div>
+      <div class="top-count">${count}×</div>
+    </div>
+  `).join('');
+}
+
+function renderRisks() {
+  const since = getRangeMs();
+  const history = getHistory().filter(h => h.at >= since);
+
+  // Risk 1: distress phrase frequency
+  const distressKeywords = ['help', 'pain', 'sad', 'tired', 'sick', 'worried', 'scared', 'ayuda', 'dolor', 'triste', 'cansado', 'enfermo'];
+  const distressCount = history.filter(h => {
+    const t = (h.text || '').toLowerCase();
+    return distressKeywords.some(k => t.includes(k));
+  }).length;
+  const distressRate = history.length ? (distressCount / history.length * 100) : 0;
+  const distressLevel = distressRate > 30 ? 'danger' : distressRate > 15 ? 'warn' : '';
+
+  // Risk 2: night activity (11pm-5am)
+  const nightCount = history.filter(h => {
+    const hr = new Date(h.at).getHours();
+    return hr >= 23 || hr < 5;
+  }).length;
+  const nightRate = history.length ? (nightCount / history.length * 100) : 0;
+  const nightLevel = nightRate > 25 ? 'warn' : '';
+
+  // Risk 3: urgent / sad emotion frequency
+  const negCount = history.filter(h => h.emotion === 'urgent' || h.emotion === 'sad').length;
+  const negRate = history.length ? (negCount / history.length * 100) : 0;
+  const negLevel = negRate > 40 ? 'danger' : negRate > 20 ? 'warn' : '';
+
+  // Risk 4: communication decline (compare halves)
+  const midPoint = since + (Date.now() - since) / 2;
+  const firstHalf = history.filter(h => h.at < midPoint).length;
+  const secondHalf = history.filter(h => h.at >= midPoint).length;
+  let declineLevel = '';
+  let declineNote = 'No significant change';
+  if (firstHalf > 5 && secondHalf < firstHalf * 0.6) {
+    declineLevel = 'warn';
+    declineNote = `Activity dropped ${Math.round((1 - secondHalf/firstHalf)*100)}% in recent half`;
+  } else if (firstHalf > 5 && secondHalf < firstHalf * 0.4) {
+    declineLevel = 'danger';
+    declineNote = `Significant decline — ${Math.round((1 - secondHalf/firstHalf)*100)}% fewer messages`;
+  }
+
+  document.getElementById('risk-grid').innerHTML = `
+    <div class="risk-item ${distressLevel}">
+      <div class="risk-label">Distress phrases</div>
+      <div class="risk-value">${distressRate.toFixed(0)}%</div>
+      <div class="risk-note">${distressCount} of ${history.length} messages contain pain/help/distress keywords</div>
+    </div>
+    <div class="risk-item ${nightLevel}">
+      <div class="risk-label">Night-time activity</div>
+      <div class="risk-value">${nightRate.toFixed(0)}%</div>
+      <div class="risk-note">${nightCount} messages sent between 11pm and 5am — sleep disruption indicator</div>
+    </div>
+    <div class="risk-item ${negLevel}">
+      <div class="risk-label">Negative emotional tone</div>
+      <div class="risk-value">${negRate.toFixed(0)}%</div>
+      <div class="risk-note">${negCount} messages spoken with sad or urgent tone</div>
+    </div>
+    <div class="risk-item ${declineLevel}">
+      <div class="risk-label">Communication trend</div>
+      <div class="risk-value">${secondHalf} vs ${firstHalf}</div>
+      <div class="risk-note">${declineNote}</div>
+    </div>
+  `;
+}
+
+function rerender() {
+  renderActivity();
+  renderEmotions();
+  renderVoiceHealth();
+  renderTopPhrases();
+  renderRisks();
+}
+
+function exportReport() {
+  const since = getRangeMs();
+  const history = getHistory().filter(h => h.at >= since);
+  const profile = getProfile();
+  const voices = getUserVoices();
+
+  // Build CSV with multiple sections
+  let csv = 'VELA PATIENT REPORT\n';
+  csv += `Generated,${new Date().toISOString()}\n`;
+  csv += `Patient,${profile.name || ''}\n`;
+  csv += `Stage,${profile.stage || ''}\n`;
+  csv += `Region,${profile.region || ''}\n`;
+  csv += `Language,${profile.language || ''}\n\n`;
+
+  csv += 'MESSAGES\n';
+  csv += 'Timestamp,Emotion,Text\n';
+  history.forEach(h => {
+    csv += `"${new Date(h.at).toISOString()}","${h.emotion || 'neutral'}","${(h.text || '').replace(/"/g, '""')}"\n`;
+  });
+
+  csv += '\nVOICE SAMPLES\n';
+  csv += 'Name,Created,Active\n';
+  voices.forEach(v => {
+    csv += `"${v.voiceName}","${new Date(v.createdAt).toISOString()}",${v.active ? 'YES' : 'no'}\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vela-patient-report-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Caregiver gate
+  if (sessionStorage.getItem('vela_carer_unlocked') !== '1') {
+    if (!confirm('This report is for caregivers only. Continue to caregiver login?')) {
+      location.href = 'home.html';
+      return;
+    }
+    location.href = 'caregiver.html?return=patient-report.html';
+    return;
+  }
+  renderMeta();
+  rerender();
+});
+</script>
+</body>
+</html>

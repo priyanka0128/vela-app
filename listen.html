@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Listen Mode — Vela</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="topnav-inner">
+    <a class="brand vela-logo" href="landing.html" aria-label="Vela home">
+      <svg viewBox="0 0 130 32" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <text x="0" y="25" font-family="Inter,sans-serif" font-weight="700" font-size="28" letter-spacing="-0.04em" fill="currentColor">vela</text>
+        <g transform="translate(74,4)" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round">
+          <path d="M 0 4 Q 12 14, 0 24"/>
+          <path d="M 8 4 Q 20 14, 8 24"/>
+          <path d="M 16 4 Q 28 14, 16 24"/>
+        </g>
+      </svg>
+    </a>
+    <span class="topnav-title">Listen mode</span>
+    <div class="topnav-actions">
+      <a href="home.html" class="btn btn-ghost">← Home</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="badge badge-lime mb-2">AI conversation partner</div>
+  <h1>Vela listens for you.</h1>
+  <p class="page-subtitle">Turn on listen mode. Vela hears the conversation around you and suggests 3 ready-to-speak responses in your own cloned voice. Tap one — you're back in the conversation.</p>
+
+  <!-- Listen toggle -->
+  <div class="card card-lg" style="text-align:center">
+    <button class="mic-btn" id="listen-btn" onclick="toggleListen()" style="background:var(--lime);width:96px;height:96px;font-size:42px">👂</button>
+    <div style="font-size:16px;font-weight:600;color:var(--soft);margin-top:8px" id="listen-status">Tap to start listening</div>
+    <div style="font-size:12px;color:var(--softer);margin-top:4px">Privacy: nothing is recorded or stored. Audio is processed locally and discarded.</div>
+  </div>
+
+  <!-- Heard text -->
+  <div class="card" id="heard-card" style="display:none">
+    <div class="row-between mb-2">
+      <span class="label" style="margin:0">Heard</span>
+      <span class="badge"><span class="status-dot live"></span>Processing</span>
+    </div>
+    <div style="font-size:16px;line-height:1.5" id="heard-text">...</div>
+  </div>
+
+  <!-- Suggestions -->
+  <div id="suggestions-area" style="display:none">
+    <div class="card-title mt-6">Suggested replies</div>
+    <div class="suggest-list" id="suggestions"></div>
+  </div>
+
+  <!-- Conversation history -->
+  <div id="history-area" style="display:none">
+    <div class="card-title mt-6">This conversation</div>
+    <div class="card card-light" id="history-display"></div>
+    <button class="btn btn-secondary btn-block mt-4" onclick="clearConversation()">Clear conversation</button>
+  </div>
+
+</div>
+
+<script src="js/app.js"></script>
+<script>
+let recognition = null;
+let isListening = false;
+let lastTrigger = 0;
+let conversation = []; // {who: 'them'|'me', text}
+
+// ─── Listen toggle ──────────────────────────────────────────
+function toggleListen() {
+  if (isListening) stopListen();
+  else startListen();
+}
+
+function startListen() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    setStatus('❌ Voice recognition not supported. Try Chrome.', true);
+    return;
+  }
+
+  const profile = getProfile();
+  recognition = new SR();
+  recognition.lang = profile.language === 'en' ? 'en-US'
+                  : profile.language === 'fr' ? 'fr-FR'
+                  : 'es-ES';
+  recognition.continuous = true;
+  recognition.interimResults = false;
+
+  recognition.onstart = () => {
+    isListening = true;
+    const btn = document.getElementById('listen-btn');
+    btn.classList.add('recording');
+    btn.textContent = '⏹';
+    setStatus('Listening...');
+  };
+
+  recognition.onresult = (e) => {
+    let text = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) text += e.results[i][0].transcript;
+    }
+    if (text.trim()) handleHeard(text.trim());
+  };
+
+  recognition.onerror = (e) => {
+    if (e.error === 'no-speech') return; // just keep listening
+    if (e.error === 'not-allowed') {
+      setStatus('❌ Microphone permission denied', true);
+      stopListen();
+    } else {
+      setStatus('Error: ' + e.error, true);
+    }
+  };
+
+  recognition.onend = () => {
+    // Auto-restart if still meant to be listening
+    if (isListening) {
+      try { recognition.start(); } catch (e) { /* ignore */ }
+    } else {
+      const btn = document.getElementById('listen-btn');
+      btn.classList.remove('recording');
+      btn.textContent = '👂';
+      setStatus('Tap to start listening');
+    }
+  };
+
+  try { recognition.start(); }
+  catch (e) { setStatus('Could not start: ' + e.message, true); }
+}
+
+function stopListen() {
+  isListening = false;
+  if (recognition) recognition.stop();
+}
+
+function setStatus(msg, err) {
+  const el = document.getElementById('listen-status');
+  el.textContent = msg;
+  el.style.color = err ? '#fca5a5' : 'var(--soft)';
+}
+
+// ─── Handle heard text → fetch suggestions ──────────────────
+async function handleHeard(text) {
+  // Debounce
+  if (Date.now() - lastTrigger < 800) return;
+  lastTrigger = Date.now();
+
+  document.getElementById('heard-card').style.display = 'block';
+  document.getElementById('heard-text').textContent = text;
+  conversation.push({ who: 'them', text });
+  renderConversation();
+
+  document.getElementById('suggestions-area').style.display = 'block';
+  document.getElementById('suggestions').innerHTML = '<div class="text-soft text-sm" style="padding:14px">Generating suggestions...</div>';
+
+  try {
+    const profile = getProfile();
+    const res = await fetch('/api/suggest-responses', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        heardText: text,
+        language: profile.language || 'es',
+        region: profile.region || 'spain',
+        recentHistory: conversation.slice(-6)
+      })
+    });
+    if (!res.ok) throw new Error('API ' + res.status);
+    const data = await res.json();
+    renderSuggestions(data.suggestions || []);
+  } catch (e) {
+    document.getElementById('suggestions').innerHTML = `<div class="text-soft text-sm" style="padding:14px;color:#fca5a5">Couldn't generate suggestions: ${e.message}</div>`;
+  }
+}
+
+function renderSuggestions(arr) {
+  const list = document.getElementById('suggestions');
+  list.innerHTML = '';
+  if (!arr.length) {
+    list.innerHTML = '<div class="text-soft text-sm" style="padding:14px">No suggestions returned</div>';
+    return;
+  }
+  arr.forEach(s => {
+    const btn = document.createElement('button');
+    btn.className = 'suggest-pill';
+    btn.textContent = s;
+    btn.onclick = () => speakSuggestion(s);
+    list.appendChild(btn);
+  });
+}
+
+async function speakSuggestion(text) {
+  conversation.push({ who: 'me', text });
+  renderConversation();
+  await speakText(text, 'neutral');
+  saveHistory(text, 'neutral');
+  document.getElementById('suggestions').innerHTML = '<div class="text-soft text-sm" style="padding:14px">Waiting for next message...</div>';
+}
+
+function renderConversation() {
+  if (!conversation.length) {
+    document.getElementById('history-area').style.display = 'none';
+    return;
+  }
+  document.getElementById('history-area').style.display = 'block';
+  const html = conversation.slice(-8).map(m => {
+    const align = m.who === 'me' ? 'right' : 'left';
+    const color = m.who === 'me' ? 'var(--accent-soft)' : 'var(--bg-alt)';
+    const lbl = m.who === 'me' ? 'You' : 'Them';
+    return `<div style="margin-bottom:8px;text-align:${align}">
+      <div style="font-size:11px;color:var(--softer);margin-bottom:2px">${lbl}</div>
+      <div style="display:inline-block;max-width:80%;background:${color};border:1px solid var(--glass-br);border-radius:12px;padding:8px 12px;font-size:14px;text-align:left">${m.text}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('history-display').innerHTML = html;
+}
+
+function clearConversation() {
+  conversation = [];
+  renderConversation();
+  document.getElementById('heard-card').style.display = 'none';
+  document.getElementById('suggestions-area').style.display = 'none';
+}
+
+// Cleanup on leave
+window.addEventListener('beforeunload', () => {
+  if (recognition) recognition.stop();
+});
+
+window.addEventListener('DOMContentLoaded', () => {
+  try {
+    const consent = JSON.parse(localStorage.getItem('vela_consent') || '{}');
+    if (!consent.accepted) { location.href = 'index.html'; return; }
+  } catch { location.href = 'index.html'; return; }
+});
+</script>
+</body>
+</html>
